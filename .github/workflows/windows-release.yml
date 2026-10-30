@@ -50,6 +50,7 @@ jobs:
           update: false
       - name: Prepare fixed dependencies
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
           python -m pip install -r requirements-build.txt
           npm install --prefix vendor/ui --no-package-lock playwright@1.62.1
           "NODE_PATH=$PWD/vendor/ui/node_modules" >> $env:GITHUB_ENV
@@ -58,6 +59,7 @@ jobs:
           python tools/release/verify_native.py
       - name: Build from release source
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
           $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           python tools/ffmpeg/build.py --msys2 "${{ steps.msys2.outputs.msys2-location }}" --vcvars "$vs/VC/Auxiliary/Build/vcvars64.bat" --out releases/ffmpeg
@@ -67,6 +69,7 @@ jobs:
           python tools/desktop/build_trial.py --backend releases/backend/UTdrSpriteBackend --extractor releases/extractor/SpriteExtractor --out releases/windows
       - name: Verify Windows program
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
           python tools/animation/test_cli.py
           python tools/animation/test_cli.py --cli releases/windows/backend/utdr.exe
           python tools/animation/verify_portable.py --backend releases/windows/backend
@@ -76,5 +79,6 @@ jobs:
           node tools/desktop/test_public.cjs releases/windows
       - name: Package and attach to draft
         run: |
+          $PSNativeCommandUseErrorActionPreference = $true
           python tools/release/package_public.py --runtime releases/windows --out releases/public
           python ../pipeline/tools/release/windows_ci.py upload
