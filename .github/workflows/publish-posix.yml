@@ -1,0 +1,25 @@
+name: Publish macOS and Linux prerelease
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: publish-posix-prerelease
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Ralkrusie/UTdrSpriteLibrary'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - run: python tools/release/publish_posix.py
