@@ -55,6 +55,8 @@ jobs:
           python tools/animation/test_export_files.py
           python tools/animation/test_mov.py --ffmpeg releases/ffmpeg-native/ffmpeg-minimal/ffmpeg
           python tools/animation/verify_portable.py --backend releases/backend-native/UTdrSpriteBackend
+          python tools/animation/test_cli.py
+          python tools/animation/test_cli.py --cli releases/backend-native/UTdrSpriteBackend/utdr
       - name: Assemble desktop
         run: |
           python tools/desktop/fetch_electron.py

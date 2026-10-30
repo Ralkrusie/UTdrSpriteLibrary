@@ -6,11 +6,11 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = '0.3.0-rc2'
+VERSION = '0.3.0-rc3'
 ROOT_FILES = ('README.md', 'LICENSE', 'ASSET_NOTICE.md', 'THIRD_PARTY_NOTICES.md',
               '.gitignore', 'requirements-animation.txt',
               'requirements-build.txt', 'start-animation.cmd')
-DOCS = ('REQUIREMENTS.md', 'PACKAGE_FORMAT.md', 'BUILD.md', 'NATIVE_SOURCES.md')
+DOCS = ('REQUIREMENTS.md', 'PACKAGE_FORMAT.md', 'BUILD.md', 'NATIVE_SOURCES.md', 'CLI.md')
 IGNORED = {'__pycache__', 'bin', 'obj', '.git', 'node_modules'}
 BUILD_RECORDS = {'packaging-profile.json', 'build-profile.json',
                  'upstream-source-build.json', 'FFmpeg-build-profile.json',
@@ -50,7 +50,7 @@ def main():
     runtime, out = args.runtime.resolve(), args.out.resolve()
     if out == runtime or out.is_relative_to(runtime):
         raise ValueError('Output must be outside the runtime')
-    for name in ('SpriteLibrary.exe', 'LICENSE', 'Electron-LICENSE', 'LICENSES.chromium.html',
+    for name in ('SpriteLibrary.exe', 'utdr.cmd', 'backend/utdr.exe', 'LICENSE', 'Electron-LICENSE', 'LICENSES.chromium.html',
                  'THIRD_PARTY_NOTICES.md', 'ASSET_NOTICE.md'):
         if not (runtime / name).is_file():
             raise ValueError('Runtime missing ' + name)
@@ -70,7 +70,7 @@ def main():
     for name in ('main.cjs', 'preload.cjs', 'platform.cjs', 'package.json'):
         if sha256(ROOT / 'tools/desktop' / name) != sha256(runtime / 'resources/app' / name):
             raise ValueError('Stale desktop source: ' + name)
-    for name in ('BUILD.md', 'NATIVE_SOURCES.md'):
+    for name in ('BUILD.md', 'NATIVE_SOURCES.md', 'CLI.md'):
         if sha256(ROOT/'docs'/name) != sha256(runtime/'docs'/name):
             raise ValueError('Stale runtime build documentation: '+name)
     upstream = ROOT / 'vendor/release-sources'

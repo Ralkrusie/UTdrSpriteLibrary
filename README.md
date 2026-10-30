@@ -30,6 +30,18 @@ python -m venv .venv
 
 删除素材包不会删除个人设置或导出结果。MOV 保存一轮动画，接收软件的透明与循环支持需实际确认。
 
+## 命令行
+
+桌面版自 v0.3.0-rc3 起提供独立 CLI，无需打开窗口。Windows 使用 `utdr.cmd`，Linux 使用 `./utdr`，macOS 位于 `.app/Contents/Resources/utdr`。
+
+```sh
+utdr --help
+utdr packages list --json
+utdr schema --json
+```
+
+支持包管理、查询、收藏、预设和导出；AI 调用方式见 [CLI 文档](docs/CLI.md)。源码入口为 `tools/animation/cli.py`。
+
 ## 文档
 
 [构建说明](docs/BUILD.md) · [功能约定](docs/REQUIREMENTS.md) · [素材包格式](docs/PACKAGE_FORMAT.md)

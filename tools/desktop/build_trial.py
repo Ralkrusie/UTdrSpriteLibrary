@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import shutil
+import subprocess
 import zipfile
 import json
 from umt_runtime import copy_umt
@@ -29,14 +30,17 @@ def main():
   shutil.copy2(ROOT/name,out/name)
  shutil.copytree(ROOT/'licenses',out/'licenses')
  (out/'docs').mkdir()
- for name in ('BUILD.md','NATIVE_SOURCES.md'):
+ for name in ('BUILD.md','NATIVE_SOURCES.md','CLI.md'):
   shutil.copy2(ROOT/'docs'/name,out/'docs'/name)
  app=out/'resources/app';app.mkdir(parents=True)
  for name in ('main.cjs','preload.cjs','platform.cjs','package.json'):shutil.copy2(HERE/name,app/name)
+ (out/'utdr.cmd').write_text('@echo off\n"%~dp0backend\\utdr.exe" %*\nexit /b %errorlevel%\n',encoding='utf-8')
  backend=out/'backend';backend.mkdir()
  source=args.backend.resolve()
- for name in ('UTdrSpriteBackend.exe','THIRD_PARTY.txt'):shutil.copy2(source/name,backend/name)
+ for name in ('UTdrSpriteBackend.exe','utdr.exe','THIRD_PARTY.txt'):shutil.copy2(source/name,backend/name)
  for name in ('_internal','licenses'):shutil.copytree(source/name,backend/name)
+ probe=subprocess.run([str(backend/'utdr.exe'),'version','--json'],check=True,capture_output=True,text=True,encoding='utf-8')
+ if json.loads(probe.stdout).get('ok') is not True:raise ValueError('CLI launcher check failed')
  shutil.copytree(ROOT/'tools/animation/licenses',backend/'licenses',dirs_exist_ok=True)
  if args.umt:
   umt=args.umt.resolve()

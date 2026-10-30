@@ -68,7 +68,7 @@ function persist(item){
  }
  const folder=fs.mkdtempSync(path.join(category,'drag-'));
  const files=item.files.map(file=>{const target=path.join(folder,path.basename(file));fs.copyFileSync(file,target);return target});
- fs.writeFileSync(path.join(folder,'manifest.json'),JSON.stringify(item.manifest,null,2));
+ fs.writeFileSync(path.join(folder,'manifest.json'),JSON.stringify(item.manifest));
  item.files=files;item.saved=true;
 }
 ipcMain.on('sprite:drag',(event,token)=>{try{trusted(event);const item=ready.get(token);if(!item||!item.files.every(file=>fs.existsSync(file)))return;persist(item);event.sender.startDrag({file:item.files[0],files:item.files,icon:item.icon});event.sender.send('sprite:saved',token)}catch(e){log('drag error '+e.message);event.sender.send('sprite:drag-error',e.message)}});

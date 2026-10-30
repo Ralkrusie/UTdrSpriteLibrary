@@ -3,7 +3,6 @@ import argparse
 import json
 import mimetypes
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -15,8 +14,9 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
-from encoder import encode, encode_png, export_filename, settings
-from export_files import named_entries, signature, file_hashes, find_duplicate
+from encoder import settings
+from export_files import named_entries, signature, find_duplicate
+from export_service import export_batch, label
 from import_game import extract
 from library import LibraryStore, make_package, sha
 from lifecycle import bind_to_parent
@@ -32,10 +32,6 @@ def open_folder(folder):
         os.startfile(str(folder))
     else:
         subprocess.run(['/usr/bin/open' if sys.platform == 'darwin' else 'xdg-open', str(folder)], check=True)
-
-
-def label(value):
-    return re.sub(r'[^\w.-]', '_', value)[:70].strip('.') or 'library'
 
 
 def main():
@@ -144,44 +140,14 @@ def main():
             job.update(done=1, success=1, package_id=pid, current='素材包已存在' if duplicate else '已导入')
 
     def export(job, entries, options):
-        folder = Path(job['folder'])
-        folder.mkdir(parents=True, exist_ok=False)
-        records, failures = [], []
-        for package, v in entries:
-            if job['cancel']:
-                break
-            job['current'] = v['name']
-            try:
-                if options.get('original'):
-                    files = []
-                    for i, f in enumerate(v['frames']):
-                        if job['cancel']:
-                            raise InterruptedError()
-                        if 'image' not in f:
-                            raise ValueError('素材帧不完整')
-                        name = export_filename(v, options) + f'_{i:04d}.png'
-                        (folder / name).write_bytes(package.read(f['image']))
-                        files.append({'file': name, 'frame': i, 'size': [f['width'], f['height']]})
-                    record = {'name': v['name'], 'variant': v['id'], 'format': 'png', 'original': True, 'files': files}
-                elif options['format'] == 'png':
-                    record = encode_png(package, v, folder, options, lambda: job['cancel'])
-                else:
-                    out = folder / (export_filename(v, options) + {'gif': '.gif', 'mov': '.mov', 'apng': '.png'}[options['format']])
-                    record = encode(package, v, out, options, lambda: job['cancel']) | {'file': out.name}
-                records.append(record | {'package_id': package.id, 'chapters': v['chapters']})
-            except InterruptedError:
-                break
-            except Exception as error:
-                failures.append({'name': v['name'], 'variant': v['id'], 'error': str(error)})
-            job.update(done=job['done'] + 1, success=len(records), errors=len(failures))
-        package = entries[0][0]
-        manifest = {'package': store.metadata(package.id) | {'id': package.id},
-                    'options': options, 'records': records, 'errors': failures, 'cancelled': job['cancel']}
-        manifest.update(signature=job['signature'], file_hashes=file_hashes(folder, records))
-        (folder / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
-        job['current'] = '；'.join(f['error'] for f in failures[:3])
-        if options.get('original') and not failures and not job['cancel'] and options.get('open', True):
-            open_folder(folder)
+        def progress(done, success, errors, current):
+            job.update(done=done, success=success, errors=errors, current=current)
+        manifest = export_batch(store, entries, options, job['folder'], job['signature'],
+                                lambda: job['cancel'], progress)
+        job['cancel'] = manifest['cancelled']
+        job['current'] = '；'.join(f['error'] for f in manifest['errors'][:3])
+        if options.get('original') and not manifest['errors'] and not job['cancel'] and options.get('open', True):
+            open_folder(Path(job['folder']))
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):

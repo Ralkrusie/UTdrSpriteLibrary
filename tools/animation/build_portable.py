@@ -3,7 +3,6 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
-import os
 import platform
 import shutil
 import subprocess
@@ -38,24 +37,13 @@ def main():
     output = args.out.resolve()
     output.mkdir(parents=True, exist_ok=False)
     subprocess.run([
-        sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', *(['--windowed'] if sys.platform == 'win32' else []),
-        '--name', 'UTdrSpriteBackend', '--distpath', str(output),
-        # We copy the encoder executable below. The imageio hook would bundle it again.
-        '--exclude-module', 'imageio_ffmpeg',
-        # Game packages use PNG; AVIF is not an input or export format.
-        '--exclude-module', 'PIL.AvifImagePlugin', '--exclude-module', 'PIL._avif',
-        '--workpath', str(output / '_build'), '--specpath', str(output / '_build'),
-        '--add-data', f'{UI / "index.html"}{os.pathsep}.', '--add-data', f'{UI / "app.js"}{os.pathsep}.',
-        '--add-data', f'{UI / "style.css"}{os.pathsep}.',
-        '--add-data', f'{heart}{os.pathsep}ui-assets',
-        '--add-data', f'{title}{os.pathsep}ui-assets',
-        '--add-data', f'{UI / "library-ui.js"}{os.pathsep}.',
-        '--add-data', f'{ROOT / "tools/desktop/drag-ui.js"}{os.pathsep}.',
-        '--add-data', f'{ROOT / "tools/export.csx"}{os.pathsep}.', str(UI / 'server.py'),
+        sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean',
+        '--distpath', str(output), '--workpath', str(output / '_build'),
+        str(UI / 'backend.spec'),
     ], check=True)
     package = output / 'UTdrSpriteBackend'
     shutil.copy2(ffmpeg / binary, package / '_internal' / binary)
-    (package / '使用说明.txt').write_text('UTdr Sprite Library 后端组件。请通过桌面版启动。\n素材 ZIP、个人设置和导出均由桌面版分开保存。\n', encoding='utf-8-sig')
+    (package / '使用说明.txt').write_text('UTdr Sprite Library 后端与命令行组件。\n桌面入口由 Electron 启动；命令行使用 utdr --help（Windows 为 utdr.exe）。\n两者共用运行依赖，不要单独移动可执行文件。\n', encoding='utf-8-sig')
     licenses = package / 'licenses'
     licenses.mkdir()
     shutil.copytree(UI / 'licenses', licenses, dirs_exist_ok=True)

@@ -32,6 +32,15 @@ python -m venv .venv
 
 默认保留简繁中及英美英语的 Electron 资源，`--all-locales` 可保留全部语言；后端不打包未使用的 AVIF 插件。
 
+后端构建同时生成静默入口 `UTdrSpriteBackend.exe` 与控制台入口 `utdr.exe`，共用 `_internal` 依赖。Windows 桌面目录提供 `utdr.cmd`；POSIX 提供 `utdr` 启动脚本（macOS 位于 `.app/Contents/Resources`）。使用方式见 [CLI.md](CLI.md)。
+
+CLI 集成检查（所有测试数据与导出写入 `releases/` 独立目录）：
+
+```powershell
+.venv\Scripts\python tools/animation/test_cli.py
+.venv\Scripts\python tools/animation/test_cli.py --cli releases/backend-new/UTdrSpriteBackend/utdr.exe
+```
+
 ## 本地候选包
 
 ```powershell

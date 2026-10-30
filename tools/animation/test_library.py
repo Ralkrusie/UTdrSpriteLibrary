@@ -163,8 +163,11 @@ def main():
             outputs.append(folder)
             assert folder.parent.name=='normal'
             manifest = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
+            assert '\n' not in (folder / 'manifest.json').read_text(encoding='utf-8')
+            assert 'sources' not in manifest['package'] and 'extractor' not in manifest['package']
             assert manifest['package']['id'] == p1 and manifest['package']['name'] == 'Renamed DR'
             record = manifest['records'][0]
+            assert not {'package_id', 'sha256', 'assumed_game_fps', 'speed_basis'}.intersection(record)
             names = [f['file'] for f in record.get('files', [record])]
             assert all(vid[:12] not in name for name in names)
             suffix = '_original_1x_' if fmt == 'original' else '_5x_' if fmt == 'png' else '_3.75fps_5x.'

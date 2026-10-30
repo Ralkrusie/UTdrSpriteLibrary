@@ -29,7 +29,7 @@ def main():
             raise ValueError('Backend contains unexpected data: ' + str(relative))
         if file.is_symlink() and not file.resolve().is_relative_to(source):
             raise ValueError('Backend symlink escapes its package: ' + str(relative))
-    for name in ('UTdrSpriteBackend', '_internal/ffmpeg', 'licenses'):
+    for name in ('UTdrSpriteBackend', 'utdr', '_internal/ffmpeg', 'licenses'):
         if not (source / name).exists():
             raise ValueError('Native backend missing ' + name)
     # Executing these also rejects a foreign-architecture or Windows backend.
@@ -69,6 +69,12 @@ def main():
     for name in ('main.cjs', 'preload.cjs', 'platform.cjs', 'package.json'):
         shutil.copy2(HERE / name, app / name)
     shutil.copytree(source, payload / 'backend', symlinks=True, ignore=shutil.ignore_patterns(*RECORDS, 'build-info.json'))
+    launcher = payload / 'utdr'
+    launcher.write_text('#!/bin/sh\nexec "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/backend/utdr" "$@"\n', encoding='utf-8', newline='\n')
+    launcher.chmod(0o755)
+    probe = subprocess.run([str(launcher), 'version', '--json'], check=True, capture_output=True, text=True, encoding='utf-8')
+    if json.loads(probe.stdout).get('ok') is not True:
+        raise ValueError('CLI launcher check failed')
     # Keep the upstream MIT grant separately before installing the project license.
     shutil.copy2(out / 'LICENSE', payload / 'Electron-LICENSE')
     if payload != out:
@@ -77,7 +83,7 @@ def main():
         shutil.copy2(ROOT / name, payload / name)
     shutil.copytree(ROOT / 'licenses', payload / 'licenses', ignore=shutil.ignore_patterns(*RECORDS))
     (payload / 'docs').mkdir()
-    for name in ('BUILD.md', 'NATIVE_SOURCES.md'):
+    for name in ('BUILD.md', 'NATIVE_SOURCES.md', 'CLI.md'):
         shutil.copy2(ROOT / 'docs' / name, payload / 'docs' / name)
     (payload / '使用说明.txt').write_text(
         'UTdrSpriteLibrary · macOS / Linux 候选版\n\n'
