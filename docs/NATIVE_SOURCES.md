@@ -27,4 +27,4 @@ Windows 测试版配套提供本项目源码 ZIP 和上游来源 ZIP。解压来
 
 ## macOS／Linux 候选构建
 
-`tools/ffmpeg/build_posix.py` 使用同一 FFmpeg n7.1 归档与精简编解码配置，在目标系统用 Clang／GCC 编译；生成的 VERSION 仍为 7.1-utdr1。这两个平台的首版候选包不含游戏提取器及其 .NET／UMT／Magick 依赖。当前只完成构建入口，平台产物与实际运行尚待验证。
+`tools/ffmpeg/build_posix.py` 使用同一 FFmpeg n7.1 归档与精简编解码配置，在目标系统用 Clang／GCC 编译；生成的 VERSION 仍为 7.1-utdr1。这两个平台的首版候选包不含游戏提取器及其 .NET／UMT／Magick 依赖。原生产物由对应平台的 CI 构建；macOS／Linux 版本未在对应机器上人工实测。

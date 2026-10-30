@@ -43,7 +43,7 @@ python -m venv .venv
 
 ## macOS／Linux 原生候选构建
 
-以下入口已加入代码，尚未在对应系统执行，不代表已有可用发布包。首版只导入现有 ZIP 素材包，不内置游戏提取器；支持范围须以实际构建及运行结果为准。需在目标系统和目标 CPU 架构上构建，不能从 Windows 交叉冻结 Python 后端。
+以下入口由对应平台的 CI 构建和自动检查；macOS／Linux 版本未在对应机器上人工实测。首版只导入现有 ZIP 素材包，不内置游戏提取器；支持范围须以实际构建及运行结果为准。需在目标系统和目标 CPU 架构上构建，不能从 Windows 交叉冻结 Python 后端。
 
 准备 Python 3.12.10、Clang／GCC、Make、unzip；macOS 还需 Xcode Command Line Tools。Linux 当前构建基线为 Ubuntu 22.04 x64，桌面运行需要 GTK3、NSS、ALSA、GBM 等 Electron 系统库。不要通过关闭 Electron 沙箱规避系统兼容问题。
 
