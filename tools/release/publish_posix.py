@@ -57,7 +57,8 @@ def api(path):
 
 
 def gh(*args):
-    subprocess.run(['gh', *args], cwd=ROOT, check=True)
+    print('GitHub CLI: ' + ' '.join(args[:3]), flush=True)
+    subprocess.run(['gh', *args], cwd=ROOT, check=True, timeout=600)
 
 
 def digest(file):
@@ -75,25 +76,29 @@ def main():
     if {a['name'] for a in artifacts} != EXPECTED or any(a['expired'] for a in artifacts):
         raise ValueError('Expected native artifacts are missing or expired')
     WORK.mkdir(parents=True, exist_ok=False)
-    gh('run', 'download', str(RUN), '--dir', str(WORK / 'artifacts'))
+    for name in sorted(EXPECTED):
+        print('Downloading ' + name, flush=True)
+        gh('run', 'download', str(RUN), '--name', name, '--dir', str(WORK / 'artifacts' / name))
     files = sorted(p for p in (WORK / 'artifacts').rglob('*') if p.is_file())
     expected_files = {f'UTdrSpriteLibrary-0.3.0-rc2-{target}-candidate.{ext}'
                       for target, ext in (('linux-x64', 'tar.gz'), ('darwin-x64', 'zip'), ('darwin-arm64', 'zip'))}
     if {p.name for p in files} != expected_files or len(files) != 3:
         raise ValueError('Unexpected build attachments')
     for file in files:
+        print('Inspecting ' + file.name, flush=True)
         if file.suffix == '.zip':
-            with zipfile.ZipFile(file) as archive:
+            with zipfile.ZipFile(file, metadata_encoding='utf-8') as archive:
                 if archive.testzip() is not None:
                     raise ValueError('Corrupt native archive')
-                notices = [n for n in archive.namelist() if n.endswith('/Resources/使用说明.txt')]
-                notice = archive.read(notices[0]).decode('utf-8') if len(notices) == 1 else ''
+                notices = [n for n in archive.namelist() if n.count('/') == 3 and '/Contents/Resources/' in n and n.endswith('.txt') and not n.startswith('__MACOSX/')]
+                notice = '\n'.join(archive.read(n).decode('utf-8', errors='replace') for n in notices)
         else:
             with tarfile.open(file, 'r:gz') as archive:
                 notices = [m for m in archive.getmembers() if m.name.endswith('/使用说明.txt') and m.name.count('/') == 1]
                 notice = archive.extractfile(notices[0]).read().decode('utf-8') if len(notices) == 1 else ''
         if '未在对应机器上人工实测' not in notice:
-            raise ValueError('Missing manual-test status in package')
+            raise ValueError('Missing manual-test status in ' + file.name + '; notice entries: ' + repr(notices))
+    print('Preparing corresponding source archives', flush=True)
     source = WORK / 'UTdrSpriteLibrary-0.3.0-rc2-posix.1-source.zip'
     subprocess.run(['git', 'archive', '--format=zip', '--prefix=UTdrSpriteLibrary/',
                     '-o', str(source), COMMIT], cwd=ROOT, check=True)
