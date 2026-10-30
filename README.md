@@ -6,7 +6,7 @@ An unofficial local tool for browsing, previewing, organizing and exporting UNDE
 
 支持素材包切换、搜索与收藏、动画预览、批量导出，以及 Windows 原生文件拖拽。导出格式包括 PNG、GIF、APNG 和透明 MOV。
 
-Windows x64 测试版见 [GitHub Releases](https://github.com/Ralkrusie/UTdrSpriteLibrary/releases)。macOS／Linux 为候选版，未在对应机器上人工实测；自动构建结果见 [Actions](https://github.com/Ralkrusie/UTdrSpriteLibrary/actions/workflows/desktop-posix.yml)。移动端为原型。工具只读游戏数据，不附带素材包，需自行导入 ZIP 或从自己的游戏目录提取。
+Windows、macOS／Linux 测试版见 [GitHub Releases](https://github.com/Ralkrusie/UTdrSpriteLibrary/releases)。macOS／Linux 版未在对应机器上人工实测，目前仅支持导入已有 ZIP 素材包；macOS 尚未公证。移动端为原型。工具只读游戏数据，不附带素材包，需自行导入 ZIP 或从自己的游戏目录提取。
 
 ## 快速开始
 
