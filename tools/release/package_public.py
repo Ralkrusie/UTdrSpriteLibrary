@@ -6,7 +6,7 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = '0.3.0-rc3'
+VERSION = '0.3.0-rc4'
 ROOT_FILES = ('README.md', 'LICENSE', 'ASSET_NOTICE.md', 'THIRD_PARTY_NOTICES.md',
               '.gitignore', 'requirements-animation.txt',
               'requirements-build.txt', 'start-animation.cmd')

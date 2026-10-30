@@ -1,0 +1,15 @@
+{
+  "game": "DELTARUNE",
+  "chapter": 3,
+  "sprite": "spr_dw_ch3_board_npc_bibliox",
+  "frame": 0,
+  "size": [
+    16,
+    16
+  ],
+  "sha256": "866e146743279600764a26a973f2c78afac6325ea145714f4f4fbbd0ce8a0bfd",
+  "background": "#000000",
+  "desktop_background": "transparent",
+  "desktop_layout": "full square, nearest-neighbor scaling, no added padding",
+  "layout": "centered, integer nearest-neighbor scaling, approximately 81% of square"
+}

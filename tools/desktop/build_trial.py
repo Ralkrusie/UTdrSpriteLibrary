@@ -24,6 +24,8 @@ def main():
    z.extract(entry,out)
  (out/'packaging-profile.json').write_text(json.dumps({'electron_sha256':digest,'all_locales':args.all_locales,'omitted_locales':omitted,'omitted_bytes':sum(item['bytes'] for item in omitted)},indent=2),encoding='utf-8')
  (out/'electron.exe').rename(out/'SpriteLibrary.exe')
+ from PyInstaller.utils.win32.icon import CopyIcons_FromIco
+ CopyIcons_FromIco(str(out/'SpriteLibrary.exe'),[str(ROOT/'assets/ui/app-icon.ico')])
  # Preserve Electron's MIT grant separately from our GPL license.
  (out/'LICENSE').rename(out/'Electron-LICENSE')
  for name in ('LICENSE','THIRD_PARTY_NOTICES.md','ASSET_NOTICE.md'):
@@ -34,6 +36,7 @@ def main():
   shutil.copy2(ROOT/'docs'/name,out/'docs'/name)
  app=out/'resources/app';app.mkdir(parents=True)
  for name in ('main.cjs','preload.cjs','platform.cjs','package.json'):shutil.copy2(HERE/name,app/name)
+ shutil.copy2(ROOT/'assets/ui/app-icon.png',app/'app-icon.png')
  (out/'utdr.cmd').write_text('@echo off\n"%~dp0backend\\utdr.exe" %*\nexit /b %errorlevel%\n',encoding='utf-8')
  backend=out/'backend';backend.mkdir()
  source=args.backend.resolve()

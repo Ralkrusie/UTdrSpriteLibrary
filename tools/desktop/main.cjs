@@ -93,7 +93,7 @@ function startBackend(){return new Promise((resolve,reject)=>{
 })}
 app.whenReady().then(async()=>{
  try{await startBackend();
-  win=new BrowserWindow({width:1250,height:900,title:'UTdrSpriteLibrary',backgroundColor:'#050506',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+  win=new BrowserWindow({width:1250,height:900,title:'UTdrSpriteLibrary',icon:path.join(__dirname,'app-icon.png'),backgroundColor:'#050506',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
   win.on('page-title-updated',event=>event.preventDefault());
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==base)event.preventDefault()});

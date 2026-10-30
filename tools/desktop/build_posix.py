@@ -58,6 +58,8 @@ def main():
         info.update(CFBundleIdentifier='io.github.ralkrusie.utdrspritelibrary',
                     CFBundleName='UTdrSpriteLibrary', CFBundleDisplayName='UTdrSpriteLibrary',
                     CFBundleShortVersionString=version.split('-')[0], CFBundleVersion=version.split('-')[0])
+        info['CFBundleIconFile'] = 'app-icon.icns'
+        shutil.copy2(ROOT / 'assets/ui/app-icon.icns', resources / 'app-icon.icns')
         plist.write_bytes(plistlib.dumps(info))
         payload = resources
     else:
@@ -68,6 +70,7 @@ def main():
     app.mkdir(parents=True)
     for name in ('main.cjs', 'preload.cjs', 'platform.cjs', 'package.json'):
         shutil.copy2(HERE / name, app / name)
+    shutil.copy2(ROOT / 'assets/ui/app-icon.png', app / 'app-icon.png')
     shutil.copytree(source, payload / 'backend', symlinks=True, ignore=shutil.ignore_patterns(*RECORDS, 'build-info.json'))
     launcher = payload / 'utdr'
     launcher.write_text('#!/bin/sh\nexec "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/backend/utdr" "$@"\n', encoding='utf-8', newline='\n')

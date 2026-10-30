@@ -60,7 +60,7 @@ def upload():
     release = next(r for r in api('/releases?per_page=100') if r['tag_name'] == tag)
     if not release['draft'] or release['target_commitish'] != commit:
         raise ValueError('Wrong draft target')
-    for suffix in ('windows-x64', 'upstream-sources'):
+    for suffix in ('windows-x64', 'source', 'upstream-sources'):
         file = ROOT / 'releases/public' / f'UTdrSpriteLibrary-{version}-{suffix}.zip'
         rid = release['id']
         existing = next((a for a in api(f'/releases/{rid}/assets') if a['name'] == file.name), None)

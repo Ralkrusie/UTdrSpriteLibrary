@@ -7,6 +7,8 @@
 | `assets/ui/spr_dodgeheart_0.png` | DELTARUNE `spr_dodgeheart` 第 0 帧，20×20 原始图像。 |
 | `assets/ui/fnt-main-title.svg` | 由 fnt_main（8bitoperator JVE）字形排版的固定标题 `UTdrSpriteLibrary`；仅保留可见像素，不含完整图集或字体。来源摘要见同目录 `fnt-main-source.json`。 |
 
-两项资源按维护者决定保留，再分发授权尚未独立核实，不代表官方许可或背书。本项目不附带完整游戏素材包。
+| `assets/ui/spr_dw_ch3_board_npc_bibliox_0.png`、`assets/ui/app-icon.png`、`assets/ui/app-icon.ico`、`assets/ui/app-icon.icns` | DELTARUNE 第 3 章 `spr_dw_ch3_board_npc_bibliox` 第 0 帧，16×16；桌面图标透明底，最近邻缩放，不添加留白。来源摘要见 `assets/ui/app-icon-source.json`；重建脚本为 `tools/desktop/build_icons.py`。 |
+
+上述资源按维护者决定保留，再分发授权尚未独立核实，不代表官方许可或背书。本项目不附带完整游戏素材包。
 
 These game-derived UI assets are excluded from the project's GPL grant; rights remain with their respective owners. They are retained by the maintainer's decision, without independently verified redistribution authorization or claimed official endorsement. Complete game asset packages are not included.
