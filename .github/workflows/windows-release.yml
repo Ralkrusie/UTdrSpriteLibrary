@@ -1,0 +1,80 @@
+name: Build Windows release assets
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Release source commit
+        required: true
+        type: string
+      tag:
+        description: Existing draft release tag
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: source
+        shell: pwsh
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      RELEASE_COMMIT: ${{ inputs.commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit }}
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          path: pipeline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - uses: msys2/setup-msys2@v2
+        id: msys2
+        with:
+          msystem: MSYS
+          install: make
+          update: false
+      - name: Prepare fixed dependencies
+        run: |
+          python -m pip install -r requirements-build.txt
+          npm install --prefix vendor/ui --no-package-lock playwright@1.62.1
+          "NODE_PATH=$PWD/vendor/ui/node_modules" >> $env:GITHUB_ENV
+          python ../pipeline/tools/release/windows_ci.py prepare
+          python tools/release/collect_sources.py
+          python tools/release/verify_native.py
+      - name: Build from release source
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          python tools/ffmpeg/build.py --msys2 "${{ steps.msys2.outputs.msys2-location }}" --vcvars "$vs/VC/Auxiliary/Build/vcvars64.bat" --out releases/ffmpeg
+          python tools/extractor/build_upstream.py --out releases/umt
+          python tools/extractor/build.py --library releases/umt/UndertaleModLib --out releases/extractor
+          python tools/animation/build_portable.py --ffmpeg releases/ffmpeg/ffmpeg-minimal --out releases/backend
+          python tools/desktop/build_trial.py --backend releases/backend/UTdrSpriteBackend --extractor releases/extractor/SpriteExtractor --out releases/windows
+      - name: Verify Windows program
+        run: |
+          python tools/animation/test_cli.py
+          python tools/animation/test_cli.py --cli releases/windows/backend/utdr.exe
+          python tools/animation/verify_portable.py --backend releases/windows/backend
+          python tools/animation/test_lifecycle.py
+          node tools/desktop/test_boundary.cjs
+          node tools/desktop/test_drag.cjs
+          node tools/desktop/test_public.cjs releases/windows
+      - name: Package and attach to draft
+        run: |
+          python tools/release/package_public.py --runtime releases/windows --out releases/public
+          python ../pipeline/tools/release/windows_ci.py upload
