@@ -17,7 +17,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.deepEqual(state.libraries.packages,[]);assert.deepEqual(state.settings.presets,[]);
   assert.equal(state.libraries.game_import,false);
   await page.locator('#manage-library').click();
-  assert(await page.locator('#import-mode option[value=game]').isDisabled());
+  assert(await page.locator('#import-mode option[value=game]').evaluate(option=>option.disabled && option.matches(':disabled')));
   assert(await page.locator('#start-import').isEnabled());
   await page.locator('#close-library').click();
   for(const width of [1250,640,360]){
@@ -25,11 +25,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   }
   // Obtain the backend PID from its process tree, without requiring renderer IPC.
-  backendPid=await app.evaluate(async()=>{
-   const {execFileSync}=require('node:child_process');
-   const lines=execFileSync('ps',['-axo','pid=,ppid=,comm='],{encoding:'utf8'}).trim().split('\n');
-   return lines.map(l=>l.trim().split(/\s+/)).filter(p=>+p[1]===process.pid&&p.slice(2).join(' ').includes('UTdrSpriteBackend')).map(p=>+p[0]);
-  });
+  const {execFileSync}=require('node:child_process');
+  const lines=execFileSync('ps',['-axo','pid=,ppid=,args='],{encoding:'utf8'}).trim().split('\n');
+  backendPid=lines.map(l=>l.trim().split(/\s+/)).filter(p=>+p[1]===app.process().pid&&p.slice(2).join(' ').includes('UTdrSpriteBackend')).map(p=>+p[0]);
   assert(backendPid.length>0);assert.deepEqual(errors,[]);
   assert(fs.existsSync(path.join(data,'personal')));
  }finally{await app.close()}
