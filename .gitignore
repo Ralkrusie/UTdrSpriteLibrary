@@ -14,3 +14,5 @@ __pycache__/
 /data/
 /tools/extractor/bin/
 /tools/extractor/obj/
+
+/licenses/third-party/Magick.Native-provenance.json

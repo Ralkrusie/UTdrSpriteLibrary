@@ -3,6 +3,7 @@
 Windows 版按需读取 ZIP，不解压整库。包中只有 `manifest.json`、`catalog.json` 和 `images/**/*.png`；目录条目不需要写入 ZIP。
 
 `manifest.json`：
+
 ```json
 {
   "format": "UTdrSpriteLibrary",
@@ -25,4 +26,4 @@ Windows 版按需读取 ZIP，不解压整库。包中只有 `manifest.json`、`
 
 个人数据存于 `data/personal/settings.sqlite3`：收藏、用户预设、显示名称、版本及语言说明、上次选择、保存位置。SQLite 事务避免多个实例保存设置时覆盖其他键。收藏不跨包关联；删除后重新导入相同包可恢复原收藏。
 
-导出按 `显示名称_包ID前缀/export/时间_任务ID/` 分类，拖拽按同一分类的 `drag/` 下独立 `drag-*` 目录保存。`manifest.json` 记录包身份、来源、原条目、章节和参数。原图导出逐字节复制 ZIP 内 PNG；每次输出独立副本，不覆盖旧结果。删除素材包仅删除管理目录内该 ZIP，不删除原始导入文件、个人设置或导出。
+导出按 `显示名称_包ID前缀/normal/时间_任务ID/` 分类，拖拽按同一分类的 `drag/` 下独立 `drag-*` 目录保存。`manifest.json` 记录包身份、来源、原条目、章节和参数。原图导出逐字节复制 ZIP 内 PNG；每次输出独立副本，不覆盖旧结果。删除素材包仅删除管理目录内该 ZIP，不删除原始导入文件、个人设置或导出。

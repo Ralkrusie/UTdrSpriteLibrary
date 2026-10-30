@@ -1,6 +1,8 @@
-FFmpeg 7.1 essentials build by gyan.dev, distributed by imageio-ffmpeg 0.7.0.
-License: GPL version 3 or later. Invoked as a separate command-line process.
+FFmpeg 7.1-utdr1, built from source by tools/ffmpeg/build.py.
+License: LGPL version 2.1 or later. Invoked as a separate command-line process.
 FFmpeg source: https://github.com/FFmpeg/FFmpeg/tree/n7.1
-Binary build and dependency/source information: https://www.gyan.dev/ffmpeg/builds/
-Binary distribution: https://github.com/imageio/imageio-ffmpeg
-No FFmpeg source modifications made by this project.
+Source archive SHA-256: 201fe5427412e0a0a0304a545f2aceb7e95e2ef1c26a7e486d3106fd156ed812
+MSVC static build, no external codec libraries or network support.
+Generated VERSION file: 7.1-utdr1. No codec source changes.
+Build recipe is in the project source ZIP; FFmpeg-n7.1.zip is in upstream-sources.
+Configuration and compiler version are retained alongside this notice.

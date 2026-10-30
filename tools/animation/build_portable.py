@@ -15,7 +15,14 @@ UI = Path(__file__).resolve().parent
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True, help='New build directory')
+    parser.add_argument('--ffmpeg', type=Path, required=True, help='Directory produced by tools/ffmpeg/build.py')
     args = parser.parse_args()
+    ffmpeg = args.ffmpeg.resolve()
+    ffmpeg_profile = json.loads((ffmpeg / 'build-profile.json').read_text(encoding='utf-8'))
+    if hashlib.sha256((ffmpeg / 'ffmpeg.exe').read_bytes()).hexdigest() != ffmpeg_profile['ffmpeg_sha256']:
+        raise ValueError('FFmpeg binary checksum mismatch')
+    if ffmpeg_profile['build_script_sha256'] != hashlib.sha256((ROOT/'tools/ffmpeg/build.py').read_bytes()).hexdigest():
+        raise ValueError('FFmpeg was built using a different build recipe')
     heart = ROOT / 'assets/ui/spr_dodgeheart_0.png'
     if not heart.is_file() or hashlib.sha256(heart.read_bytes()).hexdigest() != 'cf2e8376574f1ccd958063bafd59267a2829e8790783a9d5a029cdb348a2c377':
         raise ValueError('UI heart dependency missing or changed; see docs/BUILD.md')
@@ -41,13 +48,14 @@ def main():
         '--add-data', f'{ROOT / "tools/export.csx"};.', str(UI / 'server.py'),
     ], check=True)
     package = output / 'UTdrSpriteBackend'
-    import imageio_ffmpeg
-    shutil.copy2(imageio_ffmpeg.get_ffmpeg_exe(), package / '_internal' / 'ffmpeg.exe')
+    shutil.copy2(ffmpeg / 'ffmpeg.exe', package / '_internal' / 'ffmpeg.exe')
     (package / '使用说明.txt').write_text('UTdr Sprite Library 后端组件。请通过桌面版启动。\n素材 ZIP、个人设置和导出均位于桌面版 data 下独立目录。\n', encoding='utf-8-sig')
     licenses = package / 'licenses'
     licenses.mkdir()
     shutil.copytree(UI / 'licenses', licenses, dirs_exist_ok=True)
-    for name in ('Pillow', 'PyInstaller', 'imageio-ffmpeg'):
+    for file in ('build-profile.json', 'config.h', 'config_components.h', 'compiler-version.txt', 'build-tools.txt', 'version.txt', 'license-build.txt'):
+        shutil.copy2(ffmpeg / file, licenses / ('FFmpeg-' + file))
+    for name in ('Pillow', 'PyInstaller'):
         dist = importlib.metadata.distribution(name)
         for file in dist.files or []:
             if 'license' in file.name.lower() or 'copying' in file.name.lower():

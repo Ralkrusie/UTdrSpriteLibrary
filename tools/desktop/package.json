@@ -1,6 +1,6 @@
 {
   "name": "utdr-sprite-library",
-  "version": "0.3.0",
+  "version": "0.3.0-rc2",
   "main": "main.cjs",
   "private": true,
   "license": "GPL-3.0-or-later",

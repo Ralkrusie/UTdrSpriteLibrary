@@ -25,9 +25,12 @@ def main():
  (out/'electron.exe').rename(out/'SpriteLibrary.exe')
  # Preserve Electron's MIT grant separately from our GPL license.
  (out/'LICENSE').rename(out/'Electron-LICENSE')
- for name in ('LICENSE','THIRD_PARTY_NOTICES.md','ASSET_NOTICE.md','RELEASE_PREPARATION.md'):
+ for name in ('LICENSE','THIRD_PARTY_NOTICES.md','ASSET_NOTICE.md'):
   shutil.copy2(ROOT/name,out/name)
  shutil.copytree(ROOT/'licenses',out/'licenses')
+ (out/'docs').mkdir()
+ for name in ('BUILD.md','NATIVE_SOURCES.md'):
+  shutil.copy2(ROOT/'docs'/name,out/'docs'/name)
  app=out/'resources/app';app.mkdir(parents=True)
  for name in ('main.cjs','preload.cjs','package.json'):shutil.copy2(HERE/name,app/name)
  backend=out/'backend';backend.mkdir()
@@ -48,6 +51,6 @@ def main():
   for name,digest in profile['files'].items():
    if Path(name).name!=name or hashlib.sha256((source/name).read_bytes()).hexdigest()!=digest:raise ValueError('Extractor file checksum mismatch: '+name)
   shutil.copytree(source,backend/'extractor')
- (out/'使用说明.txt').write_text('UTdrSpriteLibrary · Windows 桌面候选版\n\n完整解压到可写目录后双击 SpriteLibrary.exe。无需 Python 或 FFmpeg。\n在“管理素材包”中导入 ZIP；也可指定游戏目录，只读提取并制作素材包。未知版本可留空。\n素材包保存在 data/packages，个人设置保存在 data/personal，默认导出位于 data/exports。不要单独移动后端或运行依赖。\n收藏对应当前素材包的原始条目。删除素材包会保留导出与个人设置。\n预览只使用临时缓存；开始拖拽时保存文件，取消拖拽仍保留。MOV 为 qtrle 无损透明单轮动画，接收软件的兼容性需实际确认。\n不附带游戏素材包；界面资源说明见 ASSET_NOTICE.md。许可文件位于根目录、licenses 与 backend/licenses。\n此为本地公开候选版，正式分发前尚待完成 RELEASE_PREPARATION.md 中的对应源码核查。\n',encoding='utf-8-sig')
+ (out/'使用说明.txt').write_text('UTdrSpriteLibrary · Windows x64 测试版\n\n完整解压到可写目录后双击 SpriteLibrary.exe。无需 Python 或 FFmpeg。\n在“管理素材包”中导入 ZIP；也可指定游戏目录，只读提取并制作素材包。未知版本可留空。\n素材包保存在 data/packages，个人设置保存在 data/personal，默认导出位于 data/exports。不要单独移动后端或运行依赖。\n收藏对应当前素材包的原始条目。删除素材包会保留导出与个人设置。\n预览只使用临时缓存；开始拖拽时保存文件，取消拖拽仍保留。MOV 为 qtrle 无损透明单轮动画，接收软件的兼容性需实际确认。\n不附带游戏素材包；界面资源说明见 ASSET_NOTICE.md。许可文件位于根目录、licenses 与 backend/licenses。\n测试版下载与反馈：https://github.com/Ralkrusie/UTdrSpriteLibrary/releases\n',encoding='utf-8-sig')
  print(out,flush=True)
 if __name__=='__main__':main()

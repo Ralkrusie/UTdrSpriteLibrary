@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--dotnet', default='dotnet')
+    parser.add_argument('--library', type=Path, required=True, help='UndertaleModLib directory built by build_upstream.py')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -31,6 +32,18 @@ def main():
         for file in umt.glob('*.dll'):
             if file.read_bytes() != zipped.read(file.name):
                 raise ValueError('UMT source binary differs from verified archive: '+file.name)
+    source_library = args.library.resolve()
+    provenance = json.loads((source_library/'source-build.json').read_text(encoding='utf-8'))
+    if provenance['build_script_sha256'] != digest(HERE/'build_upstream.py'):
+        raise ValueError('Upstream library build recipe differs')
+    references = out/'references'
+    references.mkdir()
+    for file in umt.glob('*.dll'):
+        shutil.copy2(file, references/file.name)
+    for name in ('UndertaleModLib.dll', 'Underanalyzer.dll'):
+        if digest(source_library/name) != provenance['files'][name]:
+            raise ValueError('Source-built library checksum mismatch: '+name)
+        shutil.copy2(source_library/name, references/name)
     script = ROOT / 'tools/export.csx'
     source = script.read_text(encoding='utf-8-sig').replace('EnsureDataLoaded();',
         'using var stream = File.OpenRead(args[0]);\n'
@@ -43,7 +56,7 @@ def main():
     package = out / 'SpriteExtractor'
     with (out/'publish.log').open('w', encoding='utf-8') as log:
         subprocess.run([args.dotnet, 'publish', str(HERE/'SpriteExtractor.csproj'), '-c', 'Release',
-                        '-o', str(package), '-p:ExportSource='+str(generated)], env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+                        '-o', str(package), '-p:ExportSource='+str(generated), '-p:UmtDir='+str(references)], env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
     # Roslyn's native symbol reader and XML documentation are copied by SDK reference
     # discovery, but are not used by the compiled, non-scripting extraction entry point.
     for file in package.glob('*.xml'):
@@ -54,11 +67,13 @@ def main():
         shutil.copy2(umt/file, package/file)
     licenses = package/'licenses'
     shutil.copytree(ROOT/'tools/animation/licenses', licenses)
+    shutil.copytree(ROOT/'licenses/third-party', licenses, dirs_exist_ok=True)
+    shutil.copy2(source_library/'source-build.json', package/'upstream-source-build.json')
     runtime = ROOT/'vendor/nuget/microsoft.netcore.app.runtime.win-x64/10.0.10'
     for file in ('LICENSE.TXT', 'THIRD-PARTY-NOTICES.TXT'):
         shutil.copy2(runtime/file, licenses/('.NET-'+file))
     profile = {'umt': '0.9.2.0', 'dotnet': '10.0.10', 'source_script_sha256': digest(script),
-               'source_library_sha256': digest(umt/'UndertaleModLib.dll'),
+               'source_library_sha256': digest(references/'UndertaleModLib.dll'),
                'files': {file.name: digest(file) for file in package.glob('*') if file.is_file()},
                'bytes': sum(file.stat().st_size for file in package.rglob('*') if file.is_file())}
     (package/'build-profile.json').write_text(json.dumps(profile, indent=2), encoding='utf-8')

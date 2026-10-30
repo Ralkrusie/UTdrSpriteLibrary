@@ -1,10 +1,12 @@
-# UI asset notice / 界面资源声明
+# 界面资源 / UI assets
 
-The GPL-3.0-or-later license for UTdrSpriteLibrary's original code does not grant rights to UNDERTALE/DELTARUNE game content or third-party fonts.
-本项目代码许可不授予游戏素材或第三方字体的使用权。本工具为非官方项目，与 Toby Fox、Fangamer 无关联。
+以下游戏衍生资源不属于本项目 GPL 代码授权，权利归各自权利人：
 
-- `assets/ui/spr_dodgeheart_0.png`: DELTARUNE spr_dodgeheart frame 0, 20×20, extracted from a local game asset package. Rights remain with the respective game rights holders.
-- `assets/ui/fnt-main-title.svg`: the fixed text “UTdrSpriteLibrary”, laid out from DELTARUNE fnt_main (font display name: 8bitoperator JVE). Contains only visible title pixels as SVG rectangles, no embedded font atlas, general-purpose font or unused characters. Rights to the underlying glyph artwork remain with the respective rights holders. Source hashes are in `fnt-main-source.json`.
+| 文件 | 来源与内容 |
+| --- | --- |
+| `assets/ui/spr_dodgeheart_0.png` | DELTARUNE `spr_dodgeheart` 第 0 帧，20×20 原始图像。 |
+| `assets/ui/fnt-main-title.svg` | 由 fnt_main（8bitoperator JVE）字形排版的固定标题 `UTdrSpriteLibrary`；仅保留可见像素，不含完整图集或字体。来源摘要见同目录 `fnt-main-source.json`。 |
 
-These two UI assets are retained by the project maintainer's explicit decision. Redistribution authorization has not been independently verified; inclusion is not a representation of official permission or affiliation. They are excluded from the project's code license. No complete sprite packages, game archives, music, personal settings or user exports are included in the public candidate.
-上述两项按维护者决定保留，其再分发授权尚未核实，不标记为已获官方授权。完整游戏素材包、游戏数据文件、音乐、个人设置和导出结果不随公开候选包提供。
+两项资源按维护者决定保留，再分发授权尚未独立核实，不代表官方许可或背书。本项目不附带完整游戏素材包。
+
+These game-derived UI assets are excluded from the project's GPL grant; rights remain with their respective owners. They are retained by the maintainer's decision, without independently verified redistribution authorization or claimed official endorsement. Complete game asset packages are not included.

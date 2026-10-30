@@ -1,43 +1,41 @@
-# Build from source / 从源码构建
+# Windows 构建
 
-当前桌面目标为 Windows x64。使用 Python 3.12.10、.NET SDK 10.0.302（目标运行时 10.0.10）、Electron 45.1.0。其他系统的桌面版尚未完成构建与验证。所有构建输出必须使用新的目录名；不要覆盖已有用户数据。
+在仓库根目录操作。构建目标为 Windows x64；依赖必须明确获取，不引用本项目历史发布包。所有输出目录使用新名称。
 
-## 固定依赖
+## 环境与依赖
 
-1. 用 Python 3.12 创建 `.venv`，执行 `python -m pip install -r requirements-build.txt`。依赖版本固定在 requirements 文件中，包括 Pillow 12.3.0、imageio-ffmpeg 0.7.0、PyInstaller 6.16.0。
-2. 从 [Electron v45.1.0](https://github.com/electron/electron/releases/tag/v45.1.0) 获取 `electron-v45.1.0-win32-x64.zip` 和 `SHASUMS256.txt`。分别保存为 `vendor/electron/electron-verified.zip` 和 `vendor/electron/SHASUMS256.txt`。组装脚本校验 ZIP 摘要。
-3. 从 [UndertaleModTool 0.9.2.0](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.9.2.0) 获取 `UTMT_CLI_v0.9.2.0-Windows.zip`，保存为 `vendor/umt/cli-download.zip`。SHA-256 必须为 `e7573e45d107be34f81f955c6e4afc3c7c8f2628e5a6f307a871e3825b3dfb40`，解压到 `vendor/umt/0.9.2.0`，其中直接包含 UndertaleModLib.dll。不要使用历史本项目发布包作为依赖。
-4. 安装上述 .NET SDK。`tools/extractor/build.py` 将从当前 `tools/export.csx` 生成只读入口，用 `SpriteExtractor.csproj` 和 `TrimmerRoots.xml` 编译并裁剪。NuGet 使用 `vendor/nuget` 缓存，首次运行需要网络。
-5. 两项 UI 图像已在 `assets/ui`；其来源与许可例外见根目录 `ASSET_NOTICE.md`。不需要完整字体或游戏包。
+- Python 3.12.10；Python 依赖版本固定在 `requirements-build.txt`。
+- .NET SDK 10.0.302，目标运行时 10.0.10；首次构建需联网，NuGet 缓存位于 `vendor/nuget`。
+- Visual Studio C++ x64 构建工具（本次 MSVC 19.51.36252）和 MSYS2＋GNU Make，用于编译精简 FFmpeg；MSYS2 内执行 `pacman -S make`。
+- [Electron 45.1.0](https://github.com/electron/electron/releases/tag/v45.1.0)：将 `electron-v45.1.0-win32-x64.zip` 保存为 `vendor/electron/electron-verified.zip`，官方 `SHASUMS256.txt` 放在同目录。
+- [UMT 0.9.2.0](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.9.2.0)：将 `UTMT_CLI_v0.9.2.0-Windows.zip` 保存为 `vendor/umt/cli-download.zip`，解压到 `vendor/umt/0.9.2.0`，其中直接包含 `UndertaleModLib.dll`。ZIP 的 SHA-256 必须为 `e7573e45d107be34f81f955c6e4afc3c7c8f2628e5a6f307a871e3825b3dfb40`。
 
-## 构建命令
+构建脚本校验上述归档；两项 UI 资源已在 `assets/ui`，无需完整游戏包或字体图集。将配套来源包中的 `upstream-sources` 内容放入 `vendor/release-sources`，或使用下方收集命令获取。
 
-在仓库根目录执行：
+## 构建
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-build.txt
-.venv\Scripts\python tools/animation/build_portable.py --out releases/backend-new
-.venv\Scripts\python tools/extractor/build.py --out releases/extractor-new
+.venv\Scripts\python tools/release/collect_sources.py
+.venv\Scripts\python tools/release/verify_native.py
+.venv\Scripts\python tools/ffmpeg/build.py --msys2 "C:/msys64" --vcvars "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Auxiliary/Build/vcvars64.bat" --out releases/ffmpeg-new
+.venv\Scripts\python tools/extractor/build_upstream.py --out releases/umt-new
+.venv\Scripts\python tools/animation/build_portable.py --ffmpeg releases/ffmpeg-new/ffmpeg-minimal --out releases/backend-new
+.venv\Scripts\python tools/extractor/build.py --library releases/umt-new/UndertaleModLib --out releases/extractor-new
 .venv\Scripts\python tools/desktop/build_trial.py --backend releases/backend-new/UTdrSpriteBackend --extractor releases/extractor-new/SpriteExtractor --out releases/windows-new
 ```
 
-运行 `releases/windows-new/SpriteLibrary.exe`。首次启动自动创建空的 data 目录；构建不带入开发者素材包和设置。只浏览／导出既有素材包时可不传 `--extractor`；此时从游戏制作素材包需要用户指定外部 UMT CLI。
+请把 `--msys2` 和 `--vcvars` 改为自己的安装路径；也可将便携 MSYS2 放在 `vendor` 内。FFmpeg 只启用原始帧与 qtrle MOV 编解码，不链接外部编解码库。
 
-## 验证与公开候选包
+入口为 `releases/windows-new/SpriteLibrary.exe`，首次启动创建空 `data/`。UMT／Underanalyzer 从固定源码编译，再与当前 `tools/export.csx` 组合；裁剪配置见 `tools/extractor/TrimmerRoots.xml`。省略 `--extractor` 可构建仅浏览／导出已有 ZIP 的版本，从游戏导入时另选外部 UMT。
+
+默认保留简繁中及英美英语的 Electron 资源，`--all-locales` 可保留全部语言；后端不打包未使用的 AVIF 插件。
+
+## 本地候选包
 
 ```powershell
-node tools/desktop/test_boundary.cjs
-node tools/desktop/test_drag.cjs
-.venv\Scripts\python tools/animation/verify_portable.py --backend releases/backend-new/UTdrSpriteBackend
-.venv\Scripts\python tools/release/collect_sources.py
 .venv\Scripts\python tools/release/package_public.py --runtime releases/windows-new --out releases/public-candidate-new
 ```
 
-打包脚本拒绝含 data/ 的运行目录。应在单独测试副本上启动软件，保留原始构建目录供打包。打包输出包括本项目源码、Windows 候选 ZIP、已收集上游源码和 SHA-256 清单；不会提交、推送或上传。
-
-`collect_sources.py` 下载固定提交／版本并记录摘要。UMT 对应提交为 `03c7048438347799e0717b6e57a9358d000472e0`；其 Underanalyzer 子模块为 `4ff50a866b4c1a7acee8cebe6a56d6a48709b453`。如自行构建 UMT，需将两者还原至对应目录并按上游说明构建。
-
-**这些步骤可以重建本项目代码，但当前不构成随附所有原生依赖的完整可重现构建。** FFmpeg 静态库、Magick.Native 依赖及 UMT 二进制对应源码的核查尚未全部完成；具体状态见 `RELEASE_PREPARATION.md`。不要把收集若干主项目源码归档描述为已经完成全部对应源码义务。
-
-测试使用生成的小型素材包，输出写入 releases 下独立目录。真实游戏导入始终只读；不向游戏目录保存。当前没有 macOS／Linux 的正式桌面产物。
+打包目录必须未经启动、不含 `data/`；在单独副本中试用。输出为 Windows ZIP、本项目源码 ZIP 和上游来源 ZIP，不自动上传。原生组件来源与重建说明见 [NATIVE_SOURCES.md](NATIVE_SOURCES.md)。
