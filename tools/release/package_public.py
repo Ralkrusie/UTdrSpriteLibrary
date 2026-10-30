@@ -25,7 +25,7 @@ def sha256(file):
 def source_files():
     files = [ROOT / name for name in ROOT_FILES]
     files += [ROOT / 'docs' / name for name in DOCS]
-    for folder in ('tools', 'assets', 'licenses'):
+    for folder in ('tools', 'assets', 'licenses', '.github'):
         files += [p for p in (ROOT / folder).rglob('*') if p.is_file()
                   and not IGNORED.intersection(p.relative_to(ROOT).parts)
                   and p.suffix not in {'.pyc', '.log'}
@@ -67,7 +67,7 @@ def main():
     for name in ('LICENSE', 'THIRD_PARTY_NOTICES.md', 'ASSET_NOTICE.md'):
         if sha256(ROOT / name) != sha256(runtime / name):
             raise ValueError('Stale runtime notice: ' + name)
-    for name in ('main.cjs', 'preload.cjs', 'package.json'):
+    for name in ('main.cjs', 'preload.cjs', 'platform.cjs', 'package.json'):
         if sha256(ROOT / 'tools/desktop' / name) != sha256(runtime / 'resources/app' / name):
             raise ValueError('Stale desktop source: ' + name)
     for name in ('BUILD.md', 'NATIVE_SOURCES.md'):

@@ -39,3 +39,28 @@ python -m venv .venv
 ```
 
 打包目录必须未经启动、不含 `data/`；在单独副本中试用。输出为 Windows ZIP、本项目源码 ZIP 和上游来源 ZIP，不自动上传。原生组件来源与重建说明见 [NATIVE_SOURCES.md](NATIVE_SOURCES.md)。
+
+
+## macOS／Linux 原生候选构建
+
+以下入口已加入代码，尚未在对应系统执行，不代表已有可用发布包。首版只导入现有 ZIP 素材包，不内置游戏提取器；支持范围须以实际构建及运行结果为准。需在目标系统和目标 CPU 架构上构建，不能从 Windows 交叉冻结 Python 后端。
+
+准备 Python 3.12.10、Clang／GCC、Make、unzip；macOS 还需 Xcode Command Line Tools。Linux 当前构建基线为 Ubuntu 22.04 x64，桌面运行需要 GTK3、NSS、ALSA、GBM 等 Electron 系统库。不要通过关闭 Electron 沙箱规避系统兼容问题。
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-build.txt
+mkdir -p vendor/release-sources releases
+curl --fail --location --retry 3 https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.1.zip -o vendor/release-sources/FFmpeg-n7.1.zip
+python tools/ffmpeg/build_posix.py --out releases/ffmpeg-native
+python tools/animation/build_portable.py --ffmpeg releases/ffmpeg-native/ffmpeg-minimal --out releases/backend-native
+python tools/desktop/fetch_electron.py
+python tools/desktop/build_posix.py --backend releases/backend-native/UTdrSpriteBackend --out releases/desktop-native
+```
+
+FFmpeg 和 Electron 下载均核对固定来源摘要。输出 macOS `.app` ZIP 或 Linux `.tar.gz`；保留可执行权限与符号链接。macOS 目前使用开发用 ad-hoc 签名，未做 Developer ID 签名、公证，不代表普通用户可直接安装的正式分发包。
+
+macOS 数据位于 `~/Library/Application Support/UTdrSpriteLibrary`；Linux 位于 `${XDG_CONFIG_HOME:-~/.config}/UTdrSpriteLibrary`。可通过绝对路径环境变量 `UTDR_DATA_DIR` 指定独立数据目录，包括测试目录。Windows 默认仍使用程序目录下的 `data/`。
+
+仓库的 `macOS and Linux candidates` 工作流仅支持手动触发，分别准备 macOS arm64、macOS x64、Linux x64。它包含后端导出与桌面启动检查，通过后保存候选包为 Actions 附件，不创建 GitHub Release。实际外部软件接收拖拽、Linux 桌面会话差异和 macOS 下载后启动仍需实机确认。

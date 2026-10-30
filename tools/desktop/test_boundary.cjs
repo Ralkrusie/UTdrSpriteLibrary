@@ -1,8 +1,8 @@
 // Exercise the IPC boundary without starting Electron or invoking OS drag actions.
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 const handlers=new Map(),sent=new Map();
-const electron={app:{whenReady:()=>({then:()=>{}}),on:()=>{}},BrowserWindow:function(){},ipcMain:{handle:(n,f)=>handlers.set(n,f),on:(n,f)=>sent.set(n,f)},nativeImage:{},dialog:{},shell:{}};
-const context=vm.createContext({require:n=>n==='electron'?electron:require(n),__dirname:__dirname,console,Buffer,process,setTimeout,clearTimeout,fetch,URL});
+const electron={app:{getPath:()=>require('node:os').tmpdir(),whenReady:()=>({then:()=>{}}),on:()=>{}},BrowserWindow:function(){},ipcMain:{handle:(n,f)=>handlers.set(n,f),on:(n,f)=>sent.set(n,f)},nativeImage:{},dialog:{},shell:{}};
+const context=vm.createContext({require:n=>n==='electron'?electron:require(n),__dirname:__dirname,console,Buffer,process:Object.assign(Object.create(process),{resourcesPath:require('node:path').resolve(__dirname,'..')}),setTimeout,clearTimeout,fetch,URL});
 vm.runInContext(fs.readFileSync(__dirname+'/main.cjs','utf8'),context);
 assert.throws(()=>handlers.get('sprite:prepare')({sender:{}},{}),/Invalid caller/);
 vm.runInContext("win={webContents:{mainFrame:{url:'http://127.0.0.1:8930/'}}};base='http://127.0.0.1:8930';",context);

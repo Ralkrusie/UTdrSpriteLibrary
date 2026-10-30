@@ -22,7 +22,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--backend', type=Path)
     args = parser.parse_args()
-    work = Path(tempfile.mkdtemp(prefix='windows-integration-', dir=ROOT / 'releases'))
+    work = Path(tempfile.mkdtemp(prefix='desktop-integration-', dir=ROOT / 'releases'))
     source = work / 'fixture'
     (source / 'images').mkdir(parents=True)
     frames = []
@@ -73,7 +73,7 @@ def main():
         command = [str(args.backend.resolve())] if args.backend else [sys.executable, str(ROOT / 'tools/animation/server.py')]
         env = dict(os.environ)
         if args.backend:
-            env['PATH'] = str(Path(os.environ.get('SystemRoot', 'C:/Windows')) / 'System32')
+            env['PATH'] = str(Path(os.environ.get('SystemRoot', 'C:/Windows')) / 'System32') if os.name == 'nt' else '/nonexistent'
             env.pop('PYTHONPATH', None)
             env.pop('PYTHONHOME', None)
         process = subprocess.Popen(command + ['--port', '0', '--data', str(data), '--ready-file', str(ready), '--parent-pid', str(os.getpid())], env=env, stdout=subprocess.DEVNULL, stderr=(work / 'server.log').open('ab'), creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)

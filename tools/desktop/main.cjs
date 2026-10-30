@@ -3,11 +3,12 @@ const {spawn}=require('node:child_process');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
+const {layout,picker}=require('./platform.cjs');
 const session=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'utdr-session-'));
 const temporary=path.join(session,'drag');fs.mkdirSync(temporary);
 function clearTemporary(){for(const entry of fs.readdirSync(temporary))fs.rmSync(path.join(temporary,entry),{recursive:true,force:true});ready.clear();cache.clear()}
-const root=path.resolve(__dirname,'../..'),backend=path.join(root,'backend');
-const dataRoot=path.join(root,'data');
+const locations=layout({appDir:__dirname,resourcesPath:process.resourcesPath,appData:process.platform==='win32'?null:app.getPath('appData'),dataDir:process.env.UTDR_DATA_DIR});
+const {root,backend}=locations,dataRoot=locations.data;
 let child,win,base='',closing=false,queue=Promise.resolve();
 if(app.setPath){fs.mkdirSync(path.join(dataRoot,'personal','electron'),{recursive:true});app.setPath('userData',path.join(dataRoot,'personal','electron'))}
 const ready=new Map(),cache=new Map();
@@ -72,7 +73,7 @@ function persist(item){
 }
 ipcMain.on('sprite:drag',(event,token)=>{try{trusted(event);const item=ready.get(token);if(!item||!item.files.every(file=>fs.existsSync(file)))return;persist(item);event.sender.startDrag({file:item.files[0],files:item.files,icon:item.icon});event.sender.send('sprite:saved',token)}catch(e){log('drag error '+e.message);event.sender.send('sprite:drag-error',e.message)}});
 ipcMain.handle('sprite:reveal',(event,token)=>{trusted(event);const item=ready.get(token);if(item?.saved)shell.showItemInFolder(item.files[0])});
-ipcMain.handle('sprite:pick',async(event,kind)=>{trusted(event);if(!['output','package','game','umt'].includes(kind))throw Error('无效选择类型');const folder=['output','game'].includes(kind);const result=await dialog.showOpenDialog(win,{properties:folder?['openDirectory','createDirectory']:['openFile'],...(folder?{}:{filters:[{name:kind==='package'?'ZIP 素材包':'UMT CLI',extensions:[kind==='package'?'zip':'exe']}]})});return result.canceled?'':result.filePaths[0]});
+ipcMain.handle('sprite:pick',async(event,kind)=>{trusted(event);if(!['output','package','game','umt'].includes(kind))throw Error('无效选择类型');const result=await dialog.showOpenDialog(win,picker(kind));return result.canceled?'':result.filePaths[0]});
 ipcMain.handle('sprite:export-package',async(event,id)=>{
  trusted(event);
  if(typeof id!=='string')throw Error('无效素材包');
@@ -83,7 +84,7 @@ ipcMain.handle('sprite:export-package',async(event,id)=>{
 });
 function startBackend(){return new Promise((resolve,reject)=>{
  const readyFile=path.join(session,'ready.json');
- child=spawn(path.join(backend,'UTdrSpriteBackend.exe'),['--port','8930','--auto-port','--data',dataRoot,'--cache',path.join(session,'import'),'--parent-pid',String(process.pid),'--ready-file',readyFile],{cwd:backend,windowsHide:true,stdio:'ignore'});
+ child=spawn(locations.executable,['--port','8930','--auto-port','--data',dataRoot,'--cache',path.join(session,'import'),'--parent-pid',String(process.pid),'--ready-file',readyFile],{cwd:backend,windowsHide:true,stdio:'ignore'});
  let finished=false;const started=Date.now();
  function check(){if(finished)return;try{if(fs.existsSync(readyFile)){const info=JSON.parse(fs.readFileSync(readyFile,'utf8'));if(info.error)throw Error(info.error);base=new URL(info.url).origin;finished=true;resolve();return}if(Date.now()-started>30000)throw Error('本地服务启动超时');setTimeout(check,100)}catch(e){finished=true;reject(e)}}
  child.on('error',error=>{finished=true;reject(error)});

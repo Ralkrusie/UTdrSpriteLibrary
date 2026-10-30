@@ -1,0 +1,82 @@
+name: macOS and Linux candidates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            target: linux-x64
+          - runner: macos-14
+            target: darwin-arm64
+          - runner: macos-15-intel
+            target: darwin-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          python -m pip install -r requirements-build.txt
+          npm install --prefix vendor/ui --no-package-lock playwright@1.62.1
+          echo "NODE_PATH=$PWD/vendor/ui/node_modules" >> "$GITHUB_ENV"
+          mkdir -p releases vendor/release-sources
+          curl --fail --location --retry 3 https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.1.zip -o vendor/release-sources/FFmpeg-n7.1.zip
+      - name: Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential unzip xvfb libgtk-3-0 libnss3 libasound2 libgbm1
+      - name: Build native FFmpeg and backend
+        run: |
+          python tools/ffmpeg/build_posix.py --out releases/ffmpeg-native
+          python tools/animation/build_portable.py --ffmpeg releases/ffmpeg-native/ffmpeg-minimal --out releases/backend-native
+      - name: Check native backend and process ownership
+        run: |
+          node tools/desktop/test_platform.cjs
+          node tools/desktop/test_boundary.cjs
+          node tools/desktop/test_drag.cjs
+          python tools/animation/test_lifecycle.py
+          python tools/animation/test_encoder.py
+          python tools/animation/test_export_files.py
+          python tools/animation/test_mov.py --ffmpeg releases/ffmpeg-native/ffmpeg-minimal/ffmpeg
+          python tools/animation/verify_portable.py --backend releases/backend-native/UTdrSpriteBackend
+      - name: Assemble desktop
+        run: |
+          python tools/desktop/fetch_electron.py
+          python tools/desktop/build_posix.py --backend releases/backend-native/UTdrSpriteBackend --out releases/desktop-native
+      - name: Linux desktop startup
+        if: runner.os == 'Linux'
+        run: xvfb-run -a node tools/desktop/test_posix.cjs releases/desktop-native
+      - name: macOS desktop startup
+        if: runner.os == 'macOS'
+        run: node tools/desktop/test_posix.cjs releases/desktop-native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UTdrSpriteLibrary-${{ matrix.target }}-candidate
+          path: |
+            releases/UTdrSpriteLibrary-*.zip
+            releases/UTdrSpriteLibrary-*.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Candidate notice
+        if: always()
+        shell: bash
+        run: |
+          echo 'macOS／Linux 版本未在对应机器上人工实测；CI 自动检查不等同于实机使用验证。' >> "$GITHUB_STEP_SUMMARY"
+          echo '当前候选版仅导入现有 ZIP 素材包，暂不支持从游戏制作素材包。' >> "$GITHUB_STEP_SUMMARY"

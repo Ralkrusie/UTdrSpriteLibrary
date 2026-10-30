@@ -2,7 +2,7 @@
 
 UTdrSpriteLibrary original code is licensed under GPL-3.0-or-later (see LICENSE). Copyright 2026 UTdrSpriteLibrary contributors. Third-party software retains its original licenses. UI game-derived artwork is separately described in ASSET_NOTICE.md and is not licensed under the project's GPL grant.
 
-| Component | Included version | License / source |
+| Component | Version used by applicable builds | License / source |
 | --- | --- | --- |
 | Electron and Chromium/Node dependencies | 45.1.0 win32-x64 | Electron MIT; retain Electron-LICENSE and LICENSES.chromium.html, including bundled dependency notices. https://github.com/electron/electron/tree/v45.1.0 |
 | CPython | 3.12.10 | PSF and included third-party licenses. https://www.python.org/downloads/release/python-31210/ |
@@ -15,5 +15,7 @@ UTdrSpriteLibrary original code is licensed under GPL-3.0-or-later (see LICENSE)
 | Newtonsoft.Json | 13.0.4 | MIT. https://github.com/JamesNK/Newtonsoft.Json/tree/13.0.4 |
 | SharpZipLib | 1.4.2 | MIT. https://github.com/icsharpcode/SharpZipLib/tree/v1.4.2 |
 | .NET runtime | 10.0.10 win-x64 | MIT and third-party notices, copied from the exact runtime package. https://github.com/dotnet/runtime |
+
+The macOS/Linux ZIP-library candidates omit the game extractor, UMT, .NET, Magick.NET and its dependencies. Their FFmpeg recipe is `tools/ffmpeg/build_posix.py`. The table above also covers the full Windows edition.
 
 Original upstream licenses are retained in `licenses/third-party`; runtime builds also include Electron/Chromium and backend license files. `tools/release/collect_sources.py` collects fixed source archives and SHA-256 hashes separately from Git. Native source layout and rebuild references are in [NATIVE_SOURCES.md](docs/NATIVE_SOURCES.md). Windows prereleases are distributed with matching project and upstream source archives on [GitHub Releases](https://github.com/Ralkrusie/UTdrSpriteLibrary/releases).

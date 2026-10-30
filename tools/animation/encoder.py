@@ -87,7 +87,7 @@ def export_filename(v, options):
 
 
 def ffmpeg_path():
-    bundled=Path(__file__).resolve().parent/'ffmpeg.exe'
+    bundled=Path(__file__).resolve().parent/('ffmpeg.exe' if sys.platform=='win32' else 'ffmpeg')
     if bundled.exists():return str(bundled)
     installed=shutil.which('ffmpeg')
     if installed:return installed

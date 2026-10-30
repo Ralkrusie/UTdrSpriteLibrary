@@ -32,7 +32,7 @@ def extract(game, umt, out, kind, version='', progress=lambda message:None, canc
     out.mkdir(parents=True,exist_ok=False);(out/'logs').mkdir(exist_ok=True)
     sources=discover(game,kind);source=[p for _,p in sources]
     fingerprints={str(p):sha(p) for p in source}
-    dedicated=cli.name.lower()=='spriteextractor.exe'
+    dedicated=cli.name.lower() in ('spriteextractor.exe','spriteextractor')
     evidence={'schema':1,'game':kind,'game_version':version,'inputs':fingerprints,'umt_sha256':sha(cli),'export_script_sha256':sha(SCRIPT),'started':time.strftime('%Y-%m-%dT%H:%M:%S')}
     if dedicated:
         evidence['extractor_sha256']=sha(cli.with_suffix('.dll'))

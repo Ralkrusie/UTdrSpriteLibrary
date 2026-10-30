@@ -24,3 +24,7 @@ Windows 测试版配套提供本项目源码 ZIP 和上游来源 ZIP。解压来
 - JPEG XL 的 skcms、sjpeg、测试和额外工具在依赖构建脚本中关闭；实际使用的 brotli、lcms、highway 等源码随上述依赖提供。没有另外打包测试用 Git 子模块。
 
 本次没有重新编译 Magick.Native；采用上游构建，并保留其固定来源与完整许可。本文说明来源对应与重建方式，不承诺不同编译环境产生完全相同的二进制字节。
+
+## macOS／Linux 候选构建
+
+`tools/ffmpeg/build_posix.py` 使用同一 FFmpeg n7.1 归档与精简编解码配置，在目标系统用 Clang／GCC 编译；生成的 VERSION 仍为 7.1-utdr1。这两个平台的首版候选包不含游戏提取器及其 .NET／UMT／Magick 依赖。当前只完成构建入口，平台产物与实际运行尚待验证。

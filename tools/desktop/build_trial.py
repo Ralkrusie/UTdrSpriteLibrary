@@ -32,7 +32,7 @@ def main():
  for name in ('BUILD.md','NATIVE_SOURCES.md'):
   shutil.copy2(ROOT/'docs'/name,out/'docs'/name)
  app=out/'resources/app';app.mkdir(parents=True)
- for name in ('main.cjs','preload.cjs','package.json'):shutil.copy2(HERE/name,app/name)
+ for name in ('main.cjs','preload.cjs','platform.cjs','package.json'):shutil.copy2(HERE/name,app/name)
  backend=out/'backend';backend.mkdir()
  source=args.backend.resolve()
  for name in ('UTdrSpriteBackend.exe','THIRD_PARTY.txt'):shutil.copy2(source/name,backend/name)

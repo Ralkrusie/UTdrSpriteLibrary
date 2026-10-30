@@ -1,8 +1,10 @@
-"""Build a self-contained Windows x64 folder using the current Python environment."""
+"""Build a self-contained backend on the target operating system."""
 import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -19,9 +21,13 @@ def main():
     args = parser.parse_args()
     ffmpeg = args.ffmpeg.resolve()
     ffmpeg_profile = json.loads((ffmpeg / 'build-profile.json').read_text(encoding='utf-8'))
-    if hashlib.sha256((ffmpeg / 'ffmpeg.exe').read_bytes()).hexdigest() != ffmpeg_profile['ffmpeg_sha256']:
+    binary = 'ffmpeg.exe' if sys.platform == 'win32' else 'ffmpeg'
+    recipe = ROOT / 'tools/ffmpeg' / ('build.py' if sys.platform == 'win32' else 'build_posix.py')
+    if sys.platform != 'win32' and (ffmpeg_profile.get('platform') != sys.platform or ffmpeg_profile.get('machine') != platform.machine()):
+        raise ValueError('FFmpeg target does not match this build host')
+    if hashlib.sha256((ffmpeg / binary).read_bytes()).hexdigest() != ffmpeg_profile['ffmpeg_sha256']:
         raise ValueError('FFmpeg binary checksum mismatch')
-    if ffmpeg_profile['build_script_sha256'] != hashlib.sha256((ROOT/'tools/ffmpeg/build.py').read_bytes()).hexdigest():
+    if ffmpeg_profile['build_script_sha256'] != hashlib.sha256(recipe.read_bytes()).hexdigest():
         raise ValueError('FFmpeg was built using a different build recipe')
     heart = ROOT / 'assets/ui/spr_dodgeheart_0.png'
     if not heart.is_file() or hashlib.sha256(heart.read_bytes()).hexdigest() != 'cf2e8376574f1ccd958063bafd59267a2829e8790783a9d5a029cdb348a2c377':
@@ -32,27 +38,31 @@ def main():
     output = args.out.resolve()
     output.mkdir(parents=True, exist_ok=False)
     subprocess.run([
-        sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', '--windowed',
+        sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', *(['--windowed'] if sys.platform == 'win32' else []),
         '--name', 'UTdrSpriteBackend', '--distpath', str(output),
         # We copy the encoder executable below. The imageio hook would bundle it again.
         '--exclude-module', 'imageio_ffmpeg',
         # Game packages use PNG; AVIF is not an input or export format.
         '--exclude-module', 'PIL.AvifImagePlugin', '--exclude-module', 'PIL._avif',
         '--workpath', str(output / '_build'), '--specpath', str(output / '_build'),
-        '--add-data', f'{UI / "index.html"};.', '--add-data', f'{UI / "app.js"};.',
-        '--add-data', f'{UI / "style.css"};.',
-        '--add-data', f'{heart};ui-assets',
-        '--add-data', f'{title};ui-assets',
-        '--add-data', f'{UI / "library-ui.js"};.',
-        '--add-data', f'{ROOT / "tools/desktop/drag-ui.js"};.',
-        '--add-data', f'{ROOT / "tools/export.csx"};.', str(UI / 'server.py'),
+        '--add-data', f'{UI / "index.html"}{os.pathsep}.', '--add-data', f'{UI / "app.js"}{os.pathsep}.',
+        '--add-data', f'{UI / "style.css"}{os.pathsep}.',
+        '--add-data', f'{heart}{os.pathsep}ui-assets',
+        '--add-data', f'{title}{os.pathsep}ui-assets',
+        '--add-data', f'{UI / "library-ui.js"}{os.pathsep}.',
+        '--add-data', f'{ROOT / "tools/desktop/drag-ui.js"}{os.pathsep}.',
+        '--add-data', f'{ROOT / "tools/export.csx"}{os.pathsep}.', str(UI / 'server.py'),
     ], check=True)
     package = output / 'UTdrSpriteBackend'
-    shutil.copy2(ffmpeg / 'ffmpeg.exe', package / '_internal' / 'ffmpeg.exe')
-    (package / '使用说明.txt').write_text('UTdr Sprite Library 后端组件。请通过桌面版启动。\n素材 ZIP、个人设置和导出均位于桌面版 data 下独立目录。\n', encoding='utf-8-sig')
+    shutil.copy2(ffmpeg / binary, package / '_internal' / binary)
+    (package / '使用说明.txt').write_text('UTdr Sprite Library 后端组件。请通过桌面版启动。\n素材 ZIP、个人设置和导出均由桌面版分开保存。\n', encoding='utf-8-sig')
     licenses = package / 'licenses'
     licenses.mkdir()
     shutil.copytree(UI / 'licenses', licenses, dirs_exist_ok=True)
+    if sys.platform != 'win32':
+        notice = (licenses / 'FFmpeg-SOURCE.txt').read_text(encoding='utf-8')
+        notice = notice.replace('tools/ffmpeg/build.py', 'tools/ffmpeg/build_posix.py').replace('MSVC static build', 'Native Clang/GCC static FFmpeg build')
+        (licenses / 'FFmpeg-SOURCE.txt').write_text(notice, encoding='utf-8')
     for file in ('build-profile.json', 'config.h', 'config_components.h', 'compiler-version.txt', 'build-tools.txt', 'version.txt', 'license-build.txt'):
         shutil.copy2(ffmpeg / file, licenses / ('FFmpeg-' + file))
     for name in ('Pillow', 'PyInstaller'):

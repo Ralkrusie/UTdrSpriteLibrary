@@ -1,8 +1,8 @@
 const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict');
 const dir=fs.mkdtempSync(path.join(path.resolve(__dirname,'../../releases'),'sprite-drag-test-'));let calls=0,lastBody,dragged;
 const handlers=new Map(),events=new Map(),lifecycle=new Map();
-const electron={app:{whenReady:()=>({then:()=>{}}),on:(n,f)=>lifecycle.set(n,f)},ipcMain:{handle:(n,f)=>handlers.set(n,f),on:(n,f)=>events.set(n,f)},nativeImage:{createFromBuffer:()=>({resize:()=>({})})},shell:{}};
-const context=vm.createContext({require:n=>n==='electron'?electron:require(n),__dirname,console,URL,Buffer,process,setTimeout,clearTimeout,fetch:async()=>({ok:true,arrayBuffer:async()=>new ArrayBuffer(0)})});
+const electron={app:{getPath:()=>require('node:os').tmpdir(),whenReady:()=>({then:()=>{}}),on:(n,f)=>lifecycle.set(n,f)},ipcMain:{handle:(n,f)=>handlers.set(n,f),on:(n,f)=>events.set(n,f)},nativeImage:{createFromBuffer:()=>({resize:()=>({})})},shell:{}};
+const context=vm.createContext({require:n=>n==='electron'?electron:require(n),__dirname,console,URL,Buffer,process:Object.assign(Object.create(process),{resourcesPath:require('node:path').resolve(__dirname,'..')}),setTimeout,clearTimeout,fetch:async()=>({ok:true,arrayBuffer:async()=>new ArrayBuffer(0)})});
 vm.runInContext(fs.readFileSync(__dirname+'/main.cjs','utf8'),context);
 context.fakeApi=async(route,body)=>{
  if(route.startsWith('/api/variant'))return {frames:[{image:'images/test.png'},{image:'images/test.png'}]};

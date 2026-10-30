@@ -1,8 +1,10 @@
-"""Windows job owns only this backend and descendants, including FFmpeg/UMT."""
+"""Own this backend's descendants, using a Windows job or a private POSIX session."""
 import ctypes
 import os
 import sys
 import threading
+import signal
+import time
 from ctypes import wintypes
 
 _job = None
@@ -10,7 +12,29 @@ _job = None
 
 def bind_to_parent(parent_pid):
     global _job
-    if sys.platform != 'win32' or not parent_pid:
+    if not parent_pid:
+        return
+    if sys.platform != 'win32':
+        # A dedicated session prevents cleanup from touching another app instance.
+        if os.getsid(0) != os.getpid():
+            os.setsid()
+        group = os.getpgrp()
+        if group != os.getpid():
+            raise RuntimeError('Backend must own its process group')
+        def stop(*_):
+            os.killpg(group, signal.SIGKILL)
+        signal.signal(signal.SIGTERM, stop)
+        signal.signal(signal.SIGINT, stop)
+        def watch_posix():
+            while True:
+                try:
+                    os.kill(parent_pid, 0)
+                except ProcessLookupError:
+                    stop()
+                except PermissionError:
+                    pass
+                time.sleep(.25)
+        threading.Thread(target=watch_posix, daemon=True).start()
         return
     kernel = ctypes.WinDLL('kernel32', use_last_error=True)
     class Basic(ctypes.Structure):

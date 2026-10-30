@@ -11,17 +11,20 @@ from lifecycle import bind_to_parent
 ROOT=Path(__file__).resolve().parents[2]
 if len(sys.argv)>1 and sys.argv[1]=='--owner':
     bind_to_parent(int(sys.argv[2]))
-    child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(300)'],creationflags=subprocess.CREATE_NO_WINDOW)
+    child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(300)'],creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
     Path(sys.argv[3]).write_text(str(child.pid))
     time.sleep(300)
     sys.exit()
 if len(sys.argv)>1 and sys.argv[1]=='--parent':
-    child=subprocess.Popen([sys.executable,__file__,'--owner',str(os.getpid()),sys.argv[2]],creationflags=subprocess.CREATE_NO_WINDOW)
+    child=subprocess.Popen([sys.executable,__file__,'--owner',str(os.getpid()),sys.argv[2]],creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
     Path(sys.argv[2]+'.owner').write_text(str(child.pid))
     time.sleep(300)
     sys.exit()
 
 def running(pid):
+    if sys.platform != 'win32':
+        result = subprocess.run(['ps', '-o', 'stat=', '-p', str(pid)], capture_output=True, text=True)
+        return result.returncode == 0 and bool(result.stdout.strip()) and not result.stdout.strip().startswith('Z')
     kernel=ctypes.WinDLL('kernel32',use_last_error=True)
     kernel.OpenProcess.argtypes=[wintypes.DWORD,wintypes.BOOL,wintypes.DWORD]
     kernel.OpenProcess.restype=wintypes.HANDLE
@@ -38,7 +41,7 @@ parents=[]
 try:
     for n in range(2):
         marker=work/str(n)
-        parents.append(subprocess.Popen([sys.executable,__file__,'--parent',str(marker)],creationflags=subprocess.CREATE_NO_WINDOW))
+        parents.append(subprocess.Popen([sys.executable,__file__,'--parent',str(marker)],creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0))
     for _ in range(100):
         if all((work/str(n)).exists() for n in range(2)):break
         time.sleep(.1)

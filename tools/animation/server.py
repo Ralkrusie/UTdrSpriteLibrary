@@ -61,10 +61,11 @@ def main():
     jobs = {}
     lock = threading.RLock()
     pool = ThreadPoolExecutor(max_workers=1)
-    bundled_umt = ROOT / 'umt' / 'UndertaleModCli.exe'
+    suffix = '.exe' if sys.platform == 'win32' else ''
+    bundled_umt = ROOT / 'umt' / ('UndertaleModCli' + suffix)
     if not FROZEN:
-        bundled_umt = ROOT / 'vendor' / 'umt' / '0.9.2.0' / 'UndertaleModCli.exe'
-    dedicated = ROOT / 'extractor' / 'SpriteExtractor.exe'
+        bundled_umt = ROOT / 'vendor' / 'umt' / '0.9.2.0' / ('UndertaleModCli' + suffix)
+    dedicated = ROOT / 'extractor' / ('SpriteExtractor' + suffix)
     if dedicated.is_file():
         bundled_umt = dedicated
 
@@ -78,6 +79,7 @@ def main():
             selected = packages[0]['id'] if packages else ''
         return {'packages': packages, 'selected': selected, 'errors': store.errors,
                 'legacy': (args.library / 'catalog.json').is_file(),
+                'game_import': sys.platform == 'win32',
                 'umt': str(bundled_umt) if bundled_umt.is_file() else ''}
 
     def new_job(kind):
@@ -114,6 +116,8 @@ def main():
                 version = str(body.get('version', '')).strip()
                 language = str(body.get('language', '')).strip()
                 if mode == 'game':
+                    if sys.platform != 'win32':
+                        raise ValueError('此平台暂未支持从游戏制作素材包，请导入 ZIP 素材包')
                     game = Path(body['path']).resolve()
                     if data.is_relative_to(game):
                         raise ValueError('游戏目录与工具数据目录必须分开')
