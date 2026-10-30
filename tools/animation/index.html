@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UTdrSpriteLibrary</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="app-heading"><h1><img class="game-title" src="/ui-title.svg" alt="UTdrSpriteLibrary" width="357" height="48"></h1><p class="app-description">UT／DR 精灵素材管理与导出</p></div>
+  <div class="library-settings">
+    <section class="menu-panel" aria-labelledby="library-title">
+      <div class="panel-heading"><h2 id="library-title">素材包</h2><p id="library-summary" class="hint"></p><button id="manage-library">管理素材包</button></div>
+      <div class="library-controls controls">
+        <select id="library" aria-label="当前素材包"></select>
+      </div>
+    </section>
+    <section class="menu-panel" aria-labelledby="output-title">
+      <div class="output-settings">
+        <div class="output-heading panel-heading">
+          <h2 id="output-title">结果导出路径</h2>
+          <div class="controls button-group">
+          <button id="pick-output">选择目录…</button>
+          <button id="cancel-pick" hidden>取消选择窗口</button>
+          <button id="open-output">打开目录</button>
+          </div>
+        </div>
+        <input id="output-dir" type="text" aria-label="结果导出路径" placeholder="完整文件夹路径">
+        <p id="output-status" role="status"></p>
+      </div>
+    </section>
+  </div>
+</header>
+<main>
+  <section class="toolbar menu-panel" aria-labelledby="batch-title">
+    <div class="panel-heading"><h2 id="batch-title">批量导出</h2></div>
+    <div class="action-toolbar">
+    <div class="controls parameter-fields batch-parameters">
+      <label>格式 <select id="format"><option value="apng">APNG 动图</option><option value="gif">GIF 动图</option><option value="mov">MOV 无损（透明）</option><option value="png">PNG 全部帧</option></select></label>
+      <label id="batch-speed-label">速度 <select id="speed-mode"><option value="7.5">7.5 FPS</option><option value="3.75" selected>3.75 FPS</option><option value="custom">自定 FPS</option></select></label>
+      <label id="custom-label" hidden>FPS <input id="fps" type="number" value="3.75" min="0.1" max="120" step="any"></label>
+      <label>缩放 <select id="scale"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option><option value="5" selected>5×</option><option value="6">6×</option><option value="7">7×</option><option value="8">8×</option><option value="9">9×</option><option value="10">10×</option><option value="15">15×</option><option value="20">20×</option><option value="custom">自定义缩放</option></select></label>
+      <label id="custom-scale-label" hidden>倍率（0.25–20×）<input id="custom-scale" type="number" min="0.25" max="20" step="any" value="5" required></label>
+    </div>
+    <button id="export-selected" class="primary">批量导出已勾选内容</button>
+    </div>
+    <details class="preset-settings">
+      <summary id="preset-summary">预设设置</summary>
+      <div class="controls preset-controls">
+        <label><input id="use-preset" type="checkbox">使用预设</label>
+        <select id="batch-preset" aria-label="预设"></select>
+        <button id="delete-preset" class="quiet" disabled>删除预设</button>
+        <input id="preset-name" aria-label="预设名称" placeholder="预设名称">
+        <button id="save-preset">保存预设</button>
+        <span id="preset-status" role="status"></span>
+      </div>
+      <p id="preset-info" class="hint" hidden></p>
+    </details>
+    <div id="job" hidden aria-live="polite">
+      <span id="job-status"></span><progress id="progress" value="0" max="1" aria-label="导出进度"></progress>
+      <button id="cancel">取消</button><button id="open-result" hidden>打开导出文件夹</button>
+    </div>
+    <p id="error" role="alert"></p>
+  </section>
+  <section class="browser-panel menu-panel" aria-labelledby="browser-title">
+    <div class="panel-heading">
+      <h2 id="browser-title">素材浏览</h2>
+      <label class="card-size-control">卡片大小 <input id="card-size" type="range" min="180" max="360" step="10" value="230"><output id="card-size-value" for="card-size">230 px</output></label>
+    </div>
+    <div class="search-controls">
+      <div class="controls search-query">
+        <input id="search" type="search" placeholder="搜索资源名，如 bibliox、seth_drawing" aria-label="搜索资源名">
+        <select id="chapter" aria-label="章节"><option value="">全部章节</option></select>
+      </div>
+      <div class="controls search-filters">
+        <label><input id="multi" type="checkbox" checked>仅多帧</label>
+        <label><input id="favorites-only" type="checkbox">仅收藏</label>
+        <label><input id="differences" type="checkbox">仅同名变体</label>
+      </div>
+    </div>
+    <div class="controls selection-actions">
+      <button id="select-page" class="quiet">选择本页</button>
+      <button id="select-filtered" class="quiet">勾选全部筛选结果</button>
+      <button id="clear" class="quiet">清空选择</button>
+      <span id="selection" aria-live="polite"></span>
+    </div>
+    <div class="list-head">
+      <span id="stats">正在加载目录…</span>
+      <nav aria-label="素材分页">
+        <button id="prev">上一页</button>
+        <label class="page-jump"><input id="page-number" type="number" min="1" value="1" aria-label="跳转页码"><span id="page"></span></label>
+        <button id="next">下一页</button>
+      </nav>
+    </div>
+    <div id="grid"></div>
+  </section>
+</main>
+<dialog id="detail" aria-labelledby="name">
+  <div class="dialog-head">
+    <div class="detail-title"><h2 id="name"></h2><button id="detail-favorite" class="favorite" aria-label="收藏"></button></div>
+    <button id="close" class="quiet">关闭</button>
+  </div>
+  <div class="action-toolbar detail-toolbar">
+  <div class="controls parameter-fields detail-parameters">
+    <label>速度 <select id="detail-speed"><option value="7.5">7.5 FPS</option><option value="3.75" selected>3.75 FPS</option><option value="custom">自定 FPS</option></select></label>
+    <label id="detail-custom-label" hidden>预览 FPS <input id="detail-fps" type="number" min="0.1" max="120" step="any"></label>
+    <label>缩放 <select id="detail-scale"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option><option value="5" selected>5×</option><option value="6">6×</option><option value="7">7×</option><option value="8">8×</option><option value="9">9×</option><option value="10">10×</option><option value="15">15×</option><option value="20">20×</option><option value="custom">自定义缩放</option></select></label>
+    <label id="detail-custom-scale-label" hidden>倍率（0.25–20×）<input id="detail-custom-scale" type="number" min="0.25" max="20" step="any" value="5" required></label>
+    <label>格式 <select id="detail-format"><option value="apng">APNG 动图</option><option value="gif">GIF 动图</option><option value="mov">MOV 无损（透明）</option><option value="png">PNG 当前帧</option><option value="png-all">PNG 全部帧</option></select></label>
+  </div>
+    <div class="controls button-group detail-export">
+      <button id="open-folder" class="quiet" disabled>导出原始 PNG 并打开目录</button>
+      <button id="export-one" class="primary">直接单独导出</button>
+  </div>
+  </div>
+  <div id="detail-info" class="detail-info"><p id="detail-size" aria-live="polite"></p></div>
+  <div class="stage"><canvas id="canvas"></canvas></div>
+  <div class="controls frame-controls">
+    <button id="play">暂停</button><button id="frame-prev">上一帧</button>
+    <input id="scrub" type="range" min="0" value="0" aria-label="帧序">
+    <button id="frame-next">下一帧</button><span id="frame-label"></span>
+  </div>
+  <div class="controls detail-result-row"><p id="detail-status" aria-live="polite"></p><button id="detail-result" hidden>打开导出文件夹</button></div>
+</dialog>
+<dialog id="library-manager" aria-labelledby="manager-title">
+  <div class="dialog-head"><h2 id="manager-title">素材包管理</h2><button id="close-library" class="quiet">关闭</button></div>
+  <div class="package-fields">
+    <label>素材包名称<input id="library-name" placeholder="当前素材包名称"></label>
+    <label>版本<input id="library-version" placeholder="未知可留空"></label>
+    <label>语言／补丁说明<input id="library-language" placeholder="未知可留空"></label>
+  </div>
+  <div class="controls package-actions"><button id="rename-library" class="primary">保存信息</button><button id="save-library">导出素材包</button><button id="delete-library" class="quiet">删除素材包</button></div>
+  <p id="manager-status" role="status"></p><p id="library-info"></p>
+  <hr>
+  <div class="controls"><label>导入方式 <select id="import-mode"><option value="zip">现有 ZIP 素材包</option><option value="game">从游戏制作素材包</option><option value="legacy">迁移本地旧素材</option></select></label></div>
+  <div id="import-path-row" class="controls"><input id="import-path" placeholder="ZIP 文件路径" aria-label="导入路径"><button id="pick-import">选择…</button></div>
+  <div id="import-metadata" hidden>
+    <div class="controls import-fields"><label>游戏 <select id="import-game"><option value="UT">UNDERTALE</option><option value="DR">DELTARUNE</option></select></label><input id="import-name" placeholder="素材包名称" aria-label="素材包名称"><input id="import-version" placeholder="版本（未知可留空）" aria-label="游戏版本"><input id="import-language" placeholder="语言／补丁说明" aria-label="语言和补丁"></div>
+    <div id="umt-row" class="controls"><input id="import-umt" placeholder="UndertaleModCli.exe 路径" aria-label="UMT 路径"><button id="pick-umt">选择 UMT…</button></div>
+  </div>
+  <div class="controls"><button id="start-import" class="primary">导入</button><button id="cancel-import" hidden>取消导入</button><span id="import-status" role="status"></span></div>
+</dialog>
+<script src="app.js"></script><script src="library-ui.js"></script><script src="drag-ui.js"></script>
+</body>
+</html>

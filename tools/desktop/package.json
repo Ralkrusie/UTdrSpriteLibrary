@@ -1,0 +1,8 @@
+{
+  "name": "utdr-sprite-library",
+  "version": "0.3.0",
+  "main": "main.cjs",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "description": "An unofficial local tool for browsing, previewing, organizing and exporting UNDERTALE and DELTARUNE sprites."
+}

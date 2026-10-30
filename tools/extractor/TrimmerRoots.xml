@@ -1,0 +1,10 @@
+<linker>
+  <!-- The 0.9.2.0 reader discovers model counting members and chunk constructors
+       by reflection. Keep these while allowing unused compiler/editor code to trim.
+       IL2009 for models without a counting method is expected; verify actual game
+       catalogs and PNG bytes against the full CLI after changing this profile. -->
+  <assembly fullname="UndertaleModLib">
+    <type fullname="UndertaleModLib.Models.*" preserve="fields"><method name="UnserializeChildObjectCount" /></type>
+    <type fullname="UndertaleModLib.UndertaleChunk*" preserve="nothing"><method name=".ctor" /></type>
+  </assembly>
+</linker>

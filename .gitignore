@@ -1,0 +1,16 @@
+/.venv/
+/.build-env/
+/library/
+/vendor/
+/releases/
+/animation-exports/
+/selected/
+/animation-settings.json
+/animation-state.json
+__pycache__/
+*.pyc
+*.log
+
+/data/
+/tools/extractor/bin/
+/tools/extractor/obj/

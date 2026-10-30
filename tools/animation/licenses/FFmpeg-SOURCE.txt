@@ -1,0 +1,6 @@
+FFmpeg 7.1 essentials build by gyan.dev, distributed by imageio-ffmpeg 0.7.0.
+License: GPL version 3 or later. Invoked as a separate command-line process.
+FFmpeg source: https://github.com/FFmpeg/FFmpeg/tree/n7.1
+Binary build and dependency/source information: https://www.gyan.dev/ffmpeg/builds/
+Binary distribution: https://github.com/imageio/imageio-ffmpeg
+No FFmpeg source modifications made by this project.

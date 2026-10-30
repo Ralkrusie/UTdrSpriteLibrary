@@ -1,0 +1,9 @@
+{
+  "font": "fnt_main",
+  "display_name": "8bitoperator JVE",
+  "text": "UTdrSpriteLibrary",
+  "representation": "Visible title pixels only; no embedded atlas",
+  "metrics_sha256": "6bf0e86948ec57337c09fd23595e6173e3f06c27a2de5bf2d802bc465a1bf68e",
+  "atlas_sha256": "66efbf9840876d0c07be62985ab50c8e491bfb1f2fb4ab9e805b8fc323796973",
+  "title_sha256": "2de9648dedb58a4b56bc74cbb49bd59eab4a2b94bcddfb6f9f5e8f9006679387"
+}
