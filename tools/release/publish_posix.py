@@ -56,6 +56,13 @@ def api(path):
         return json.load(response)
 
 
+def find_release():
+    releases = [r for r in api('/releases?per_page=100') if r['tag_name'] == TAG]
+    if len(releases) > 1:
+        raise ValueError('Multiple releases use the same tag')
+    return releases[0] if releases else None
+
+
 def gh(*args):
     print('GitHub CLI: ' + ' '.join(args[:3]), flush=True)
     subprocess.run(['gh', *args], cwd=ROOT, check=True, timeout=600)
@@ -111,7 +118,7 @@ def main():
     notes = WORK / 'notes.md'
     notes.write_text(BODY, encoding='utf-8')
     try:
-        release = api('/releases/tags/' + TAG)
+        release = find_release()
     except urllib.error.HTTPError as error:
         if error.code != 404:
             raise
@@ -124,7 +131,7 @@ def main():
     else:
         if release['target_commitish'] != COMMIT:
             raise ValueError('Draft targets another commit')
-    release = api('/releases/tags/' + TAG)
+    release = find_release()
     existing = {a['name']: a for a in release['assets']}
     for file in files:
         if file.name not in existing:
@@ -132,7 +139,7 @@ def main():
         else:
             if existing[file.name].get('digest') != digest(file):
                 raise ValueError('Existing draft asset differs')
-    release = api('/releases/tags/' + TAG)
+    release = find_release()
     expected = {p.name: (p.stat().st_size, digest(p)) for p in files}
     if {a['name'] for a in release['assets']} != set(expected):
         raise ValueError('Unexpected release attachments')
