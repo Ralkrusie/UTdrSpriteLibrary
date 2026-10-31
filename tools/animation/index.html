@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="app-heading"><h1><img class="game-title" src="/ui-title.svg" alt="UTdrSpriteLibrary" width="357" height="48"></h1><p class="app-description">UT／DR 精灵素材管理与导出</p></div>
+  <div class="app-heading"><h1><img class="game-title" src="/ui-title.svg" alt="UTdrSpriteLibrary" width="357" height="48"></h1><p class="app-description">UT／DR 精灵素材管理与导出</p><button id="open-help" class="help-button" aria-haspopup="dialog">使用说明</button></div>
   <div class="library-settings">
     <section class="menu-panel" aria-labelledby="library-title">
       <div class="panel-heading"><h2 id="library-title">素材包</h2><p id="library-summary" class="hint"></p><button id="manage-library">管理素材包</button></div>
@@ -96,6 +96,23 @@
     <div id="grid"></div>
   </section>
 </main>
+<dialog id="help" aria-labelledby="help-title">
+  <div class="dialog-head"><h2 id="help-title">使用说明</h2><button id="close-help" class="quiet" autofocus>关闭</button></div>
+  <dl class="help-functions">
+    <dt>素材包</dt><dd id="help-packages">在「管理素材包」中导入 ZIP、编辑包信息或导出素材包。Windows 支持从自己的游戏目录制作素材包，只读游戏数据。</dd>
+    <dt>素材浏览</dt><dd>按名称、章节或收藏筛选；点击图片查看详情。卡片左上角勾选，右上角星星收藏；按住 Shift 再勾选或收藏另一项，可操作两者之间的全部素材。卡片大小只影响浏览。</dd>
+    <dt>预览与单独导出</dt><dd>打开卡片后可播放、暂停、逐帧查看，调整速度、缩放与格式后单独导出；原始 PNG 导出保留原图。桌面版可把准备好的预览图拖到其他软件，接收效果取决于对方软件。</dd>
+    <dt>批量导出与预设</dt><dd>勾选素材后批量导出 PNG、GIF、APNG 或透明 MOV。缩放范围 0.25–20×，速度 0.1–120 FPS。可保存常用预设；取消「使用预设」后才能编辑。批量与详情参数分别自动记忆。</dd>
+    <dt>结果导出路径</dt><dd>指定导出文件夹；手动导出位于 normal，拖拽结果位于 drag。删除素材包不会删除已有导出。命令行用法见程序 docs/CLI.md。</dd>
+  </dl>
+  <div class="help-links">
+    <a href="https://github.com/Ralkrusie/UTdrSpriteLibrary/releases" target="_blank" rel="noopener noreferrer">官方下载链接 ↗</a>
+    <div><a href="https://wwaya.lanzouv.com/b01euw4aoh" target="_blank" rel="noopener noreferrer">UTdr 原版素材包下载 ↗</a><span class="hint">密码：<code>jarona</code></span></div>
+    <a href="https://space.bilibili.com/571877935" target="_blank" rel="noopener noreferrer">联系作者（b站）↗</a>
+    <a href="https://afdian.com/a/ralkrusie" target="_blank" rel="noopener noreferrer">支持作者（爱发电）↗</a>
+  </div>
+  <p id="help-status" role="status"></p>
+</dialog>
 <dialog id="detail" aria-labelledby="name">
   <div class="dialog-head">
     <div class="detail-title"><h2 id="name"></h2><button id="detail-favorite" class="favorite" aria-label="收藏"></button></div>
@@ -137,7 +154,7 @@
   <div id="import-path-row" class="controls"><input id="import-path" placeholder="ZIP 文件路径" aria-label="导入路径"><button id="pick-import">选择…</button></div>
   <div id="import-metadata" hidden>
     <div class="controls import-fields"><label>游戏 <select id="import-game"><option value="UT">UNDERTALE</option><option value="DR">DELTARUNE</option></select></label><input id="import-name" placeholder="素材包名称" aria-label="素材包名称"><input id="import-version" placeholder="版本（未知可留空）" aria-label="游戏版本"><input id="import-language" placeholder="语言／补丁说明" aria-label="语言和补丁"></div>
-    <div id="umt-row" class="controls"><input id="import-umt" placeholder="UndertaleModCli.exe 路径" aria-label="UMT 路径"><button id="pick-umt">选择 UMT…</button></div>
+    <div id="umt-row" class="controls"><input id="import-umt" placeholder="自带提取器或 UndertaleModCli.exe 路径" aria-label="提取器路径"><button id="pick-umt">选择 UTMT CLI…</button><button id="use-bundled-extractor">使用自带提取器</button></div>
   </div>
   <div class="controls"><button id="start-import" class="primary">导入</button><button id="cancel-import" hidden>取消导入</button><span id="import-status" role="status"></span></div>
 </dialog>

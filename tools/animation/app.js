@@ -142,3 +142,9 @@ for(const id of ['custom-scale','fps'])$(id).addEventListener('input',()=>rememb
 for(const id of ['detail-custom-scale','detail-fps'])$(id).addEventListener('input',()=>rememberView(true));
 $('batch-preset').addEventListener('change',()=>rememberView());
 $('use-preset').addEventListener('change',()=>rememberView());
+$('open-help').onclick=()=>{$('help-status').textContent='';$('help').showModal()};
+$('close-help').onclick=()=>$('help').close();
+$('help').addEventListener('click',async event=>{
+ const link=event.target.closest('a[href]');if(!link||!window.spriteDesktop?.openExternal)return;
+ event.preventDefault();try{await window.spriteDesktop.openExternal(link.href)}catch(error){$('help-status').textContent='无法打开链接：'+error.message}
+});

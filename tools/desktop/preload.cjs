@@ -1,5 +1,6 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('spriteDesktop',Object.freeze({
+ openExternal:url=>ipcRenderer.invoke('sprite:open-external',url),
  onSaved:callback=>ipcRenderer.on('sprite:saved',(_event,token)=>callback(token)),
  onError:callback=>ipcRenderer.on('sprite:drag-error',(_event,message)=>callback(message)),
  exportPackage:id=>ipcRenderer.invoke('sprite:export-package',id),

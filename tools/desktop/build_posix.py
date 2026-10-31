@@ -89,9 +89,9 @@ def main():
     for name in ('BUILD.md', 'NATIVE_SOURCES.md', 'CLI.md'):
         shutil.copy2(ROOT / 'docs' / name, payload / 'docs' / name)
     (payload / '使用说明.txt').write_text(
-        'UTdrSpriteLibrary · macOS / Linux 候选版\n\n'
+        'UTdrSpriteLibrary · macOS / Linux\n\n'
         'macOS／Linux 版本未在对应机器上人工实测；CI 自动检查不等同于实机使用验证。\n'
-        '导入桌面版制作的 ZIP 素材包即可浏览、预览和导出。无需安装 Python 或 FFmpeg。\n'
+        '导入桌面版制作的 ZIP 素材包即可浏览、预览和导出。\n'
         '此包暂不内置游戏提取器。素材包、收藏与设置存放在系统用户配置目录中。\n'
         'macOS：~/Library/Application Support/UTdrSpriteLibrary\n'
         'Linux：${XDG_CONFIG_HOME:-~/.config}/UTdrSpriteLibrary\n'

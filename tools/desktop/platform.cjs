@@ -12,7 +12,7 @@ function picker(kind,platform=process.platform){
  if(kind==='output')return {properties:['openDirectory','createDirectory']};
  if(kind==='game')return {properties:['openDirectory',...(platform==='darwin'?['treatPackageAsDirectory']:[])]};
  if(kind==='package')return {properties:['openFile'],filters:[{name:'ZIP 素材包',extensions:['zip']}]};
- return {properties:['openFile'],...(platform==='win32'?{filters:[{name:'UMT CLI',extensions:['exe']}]}:{})};
+ return {properties:['openFile'],...(platform==='win32'?{filters:[{name:'UTMT CLI',extensions:['exe']}]}:{})};
 }
 
 module.exports={layout,picker};

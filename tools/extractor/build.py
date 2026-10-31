@@ -27,11 +27,11 @@ def main():
     umt = ROOT / 'vendor/umt/0.9.2.0'
     archive = ROOT / 'vendor/umt/cli-download.zip'
     if digest(archive) != 'e7573e45d107be34f81f955c6e4afc3c7c8f2628e5a6f307a871e3825b3dfb40':
-        raise ValueError('UMT source archive checksum mismatch')
+        raise ValueError('UTMT source archive checksum mismatch')
     with zipfile.ZipFile(archive) as zipped:
         for file in umt.glob('*.dll'):
             if file.read_bytes() != zipped.read(file.name):
-                raise ValueError('UMT source binary differs from verified archive: '+file.name)
+                raise ValueError('UTMT source binary differs from verified archive: '+file.name)
     source_library = args.library.resolve()
     provenance = json.loads((source_library/'source-build.json').read_text(encoding='utf-8'))
     if provenance['build_script_sha256'] != digest(HERE/'build_upstream.py'):

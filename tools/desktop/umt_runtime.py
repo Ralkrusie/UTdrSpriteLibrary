@@ -7,7 +7,7 @@ from pathlib import Path
 def copy_umt(source, destination):
     source, destination = Path(source), Path(destination)
     if not (source / 'UndertaleModCli.exe').is_file():
-        raise ValueError('UMT CLI missing')
+        raise ValueError('UTMT CLI missing')
     destination.mkdir(parents=True, exist_ok=False)
     kept = removed = 0
     excluded = []

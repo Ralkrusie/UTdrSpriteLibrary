@@ -2,37 +2,28 @@
 
 UT／DR 精灵素材管理与导出。
 
-An unofficial local tool for browsing, previewing, organizing and exporting UNDERTALE and DELTARUNE sprites.
+An unofficial local tool for browsing, organizing and exporting UNDERTALE and DELTARUNE sprites.
 
-支持素材包切换、搜索与收藏、动画预览、批量导出，以及 Windows 原生文件拖拽。导出格式包括 PNG、GIF、APNG 和透明 MOV。
+## 下载与使用
 
-Windows、macOS／Linux 测试版见 [GitHub Releases](https://github.com/Ralkrusie/UTdrSpriteLibrary/releases)。macOS／Linux 版未在对应机器上人工实测，目前仅支持导入已有 ZIP 素材包；macOS 尚未公证。移动端为原型。工具只读游戏数据，不附带素材包，需自行导入 ZIP 或从自己的游戏目录提取。
+[下载最新版本](https://github.com/Ralkrusie/UTdrSpriteLibrary/releases/latest)，打开应用右上角的「使用说明」了解操作。
 
-## 快速开始
+| 平台 | 启动方式与功能 |
+| --- | --- |
+| Windows x64 | 解压 ZIP，运行 `SpriteLibrary.exe`。支持从游戏制作素材包、浏览、收藏、预览、批量导出和拖拽。 |
+| macOS Apple Silicon／Intel | 解压对应 ZIP，打开 `.app`。支持导入 ZIP 素材包和桌面导出功能。 |
+| Linux x64 | 解压 tar.gz，运行 `SpriteLibrary`。支持导入 ZIP 素材包和桌面导出功能。 |
+| Android 9+ | 安装 APK，导入 ZIP 素材包；支持浏览、收藏、预览、PNG／GIF／APNG 保存和分享。需较新的 Android System WebView。 |
 
-Windows 用户下载 `windows-x64.zip`，完整解压到可写目录，双击 `SpriteLibrary.exe`；无需安装 Python 或 FFmpeg。另两个源码包供开发者使用，普通使用无需下载。
+macOS／Linux 已通过原生构建和自动检查，尚未人工实机验证；macOS 尚未公证。安卓版此前已由用户试用，本次更新的浏览器跳转等原生交互仍待真机确认。
 
-从源码运行浏览器版（Windows、Python 3.12），在仓库根目录执行：
+桌面导出支持 PNG、GIF、APNG、透明 MOV；Windows 只读游戏数据。素材包独立导入，游戏素材版权归原权利人。
 
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements-animation.txt
-.venv\Scripts\python tools/animation/server.py --open --auto-port
-```
+Windows 数据位于程序旁的 `data`，macOS／Linux 位于系统用户数据目录。升级 Windows 时保留原 `data`；安卓覆盖安装保留应用数据，卸载或清除数据会移除本机素材与设置。请保留原始素材包 ZIP。
 
-在“管理素材包”中导入 ZIP；从游戏制作素材包需另行准备专用提取器或 UMT CLI，见[构建说明](docs/BUILD.md)。浏览器版填写本地路径；桌面版提供原生文件选择和拖拽。
+## 命令行与开发
 
-服务仅监听本机，默认数据目录为 `data/`，可用 `--data` 指定其他位置：
-
-- `packages/`：素材包。
-- `personal/`：收藏、预设和个人设置。
-- `exports/`：默认导出位置，按素材包分组，`normal/` 为手动导出，`drag/` 为拖拽结果。
-
-删除素材包不会删除个人设置或导出结果。MOV 保存一轮动画，接收软件的透明与循环支持需实际确认。
-
-## 命令行
-
-桌面版自 v0.3.0-rc3 起提供独立 CLI，无需打开窗口。Windows 使用 `utdr.cmd`，Linux 使用 `./utdr`，macOS 位于 `.app/Contents/Resources/utdr`。
+桌面版提供 `utdr` 命令行（Windows 为 `utdr.cmd`）：
 
 ```sh
 utdr --help
@@ -40,11 +31,13 @@ utdr packages list --json
 utdr schema --json
 ```
 
-支持包管理、查询、收藏、预设和导出；AI 调用方式见 [CLI 文档](docs/CLI.md)。源码入口为 `tools/animation/cli.py`。
+[CLI 与 AI 调用](docs/CLI.md) · [构建说明](docs/BUILD.md) · [功能约定](docs/REQUIREMENTS.md) · [素材包格式](docs/PACKAGE_FORMAT.md)
 
-## 文档
+## 相关链接
 
-[构建说明](docs/BUILD.md) · [功能约定](docs/REQUIREMENTS.md) · [素材包格式](docs/PACKAGE_FORMAT.md)
+- [UTdr 原版素材包](https://wwaya.lanzouv.com/b01euw4aoh) · 密码：`jarona`
+- [联系作者（b站）](https://space.bilibili.com/571877935)
+- [支持作者（爱发电）](https://afdian.com/a/ralkrusie)
 
 ## 许可
 

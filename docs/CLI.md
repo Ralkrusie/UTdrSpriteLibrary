@@ -35,7 +35,7 @@ utdr packages remove --package PACKAGE_ID --yes
 
 使用列表返回的完整包 ID；精灵 ID 可为 `包ID:变体ID` 或单独变体 ID。名称搜索不区分大小写，可组合 `--chapter`、`--multi-frame`、`--favorites`。分页用 `--limit`（1–1000，默认 50）、`--offset`（从 0 开始）。预设改名用 `presets save --id ID --name NAME`，未指定参数保留；删除用 `presets remove --id ID --yes`。
 
-Windows 游戏只读提取：`utdr packages create --game "D:/Games/DELTARUNE" --kind DR --name "DR 原版"`。可加 `--version`、`--language`；无内置提取器时用 `--extractor` 指定 SpriteExtractor 或 UMT。macOS／Linux 目前仅导入已有 ZIP。
+Windows 游戏只读提取：`utdr packages create --game "D:/Games/DELTARUNE" --kind DR --name "DR 原版"`。可加 `--version`、`--language`；无内置提取器时用 `--extractor` 指定 SpriteExtractor 或 UTMT。macOS／Linux 目前仅导入已有 ZIP。
 
 ## 行为约定
 

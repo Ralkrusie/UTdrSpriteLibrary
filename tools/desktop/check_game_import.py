@@ -29,7 +29,7 @@ try:
     def api(route,body=None):
         r=urllib.request.Request(base+route,data=None if body is None else json.dumps(body).encode(),headers={'Content-Type':'application/json'})
         with urllib.request.urlopen(r,timeout=60) as response:return json.load(response)
-    assert api('/api/libraries')['umt'],'Bundled UMT missing'
+    assert api('/api/libraries')['umt'],'Bundled UTMT missing'
     job=api('/api/library/import',{'mode':'game','game':a.kind,'path':str(a.game.resolve()),'name':a.kind+' 本机素材','version':'','language':'版本及补丁未确认'})
     prior=''
     for _ in range(1800):

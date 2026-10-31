@@ -73,6 +73,8 @@ function persist(item){
 }
 ipcMain.on('sprite:drag',(event,token)=>{try{trusted(event);const item=ready.get(token);if(!item||!item.files.every(file=>fs.existsSync(file)))return;persist(item);event.sender.startDrag({file:item.files[0],files:item.files,icon:item.icon});event.sender.send('sprite:saved',token)}catch(e){log('drag error '+e.message);event.sender.send('sprite:drag-error',e.message)}});
 ipcMain.handle('sprite:reveal',(event,token)=>{trusted(event);const item=ready.get(token);if(item?.saved)shell.showItemInFolder(item.files[0])});
+const helpLinks=new Set(['https://github.com/Ralkrusie/UTdrSpriteLibrary/releases','https://wwaya.lanzouv.com/b01euw4aoh','https://space.bilibili.com/571877935','https://afdian.com/a/ralkrusie']);
+ipcMain.handle('sprite:open-external',(event,url)=>{trusted(event);if(!helpLinks.has(url))throw Error('无效外部链接');return shell.openExternal(url)});
 ipcMain.handle('sprite:pick',async(event,kind)=>{trusted(event);if(!['output','package','game','umt'].includes(kind))throw Error('无效选择类型');const result=await dialog.showOpenDialog(win,picker(kind));return result.canceled?'':result.filePaths[0]});
 ipcMain.handle('sprite:export-package',async(event,id)=>{
  trusted(event);

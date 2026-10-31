@@ -202,3 +202,16 @@ input[type=number], select, #stats, #selection, #detail-size, #frame-label, .car
 .app-heading h1 { line-height: 1; }
 .game-title { display: block; width: 357px; height: 48px; image-rendering: pixelated; }
 @media (max-width: 420px) { .game-title { width: 238px; height: 32px; } }
+
+/* Help stays a quiet text action beside the application title. */
+#open-help { margin-left: auto; border: 0; background: transparent; box-shadow: none; white-space: nowrap; color: var(--muted); }
+#open-help:hover { color: var(--yellow); }
+#help { width: min(780px, calc(100vw - 36px)); box-sizing: border-box; }
+.help-functions { margin: 20px 0; line-height: 1.7; }
+.help-functions dt { color: var(--text); font-weight: 600; margin-top: 14px; }
+.help-functions dd { margin: 4px 0 0; color: var(--muted); }
+.help-links { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; }
+.help-links a { color: var(--text); text-underline-offset: 4px; }
+.help-links a:hover { color: var(--yellow); }
+.help-links > div { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+#help-status:empty { display: none; }

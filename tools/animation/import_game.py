@@ -1,4 +1,4 @@
-"""Read-only UT/DR extraction using an explicitly supplied UMT CLI."""
+"""Read-only UT/DR extraction using an explicitly supplied UTMT CLI."""
 import argparse,hashlib,json,os,subprocess,time,re,sys
 from pathlib import Path
 SCRIPT=Path(__file__).resolve().parent/'export.csx'
@@ -54,7 +54,7 @@ def extract(game, umt, out, kind, version='', progress=lambda message:None, canc
                 while process.poll() is None:
                     if cancel():raise InterruptedError('已取消导入')
                     time.sleep(.1)
-                if process.returncode:raise RuntimeError('UMT 提取失败：'+(out/f'logs/ch{ch}.log').read_text(encoding='utf-8',errors='replace')[-2000:])
+                if process.returncode:raise RuntimeError('UTMT 提取失败：'+(out/f'logs/ch{ch}.log').read_text(encoding='utf-8',errors='replace')[-2000:])
             except BaseException:
                 process.kill();process.wait();raise
     groups={};totals=[];errors=[]
@@ -83,7 +83,7 @@ def extract(game, umt, out, kind, version='', progress=lambda message:None, canc
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--game',type=Path,required=True);p.add_argument('--umt',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--kind',choices=['UT','DR'],required=True);p.add_argument('--version',default='');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--game',type=Path,required=True);p.add_argument('--utmt','--umt',dest='umt',metavar='PATH',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--kind',choices=['UT','DR'],required=True);p.add_argument('--version',default='');a=p.parse_args()
     extract(a.game,a.umt,a.out,a.kind,a.version,progress=lambda message:print(message,flush=True))
 
 if __name__=='__main__':main()

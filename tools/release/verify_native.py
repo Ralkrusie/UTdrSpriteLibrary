@@ -1,4 +1,4 @@
-"""Match the signed UMT Magick.Native DLL to its upstream native release."""
+"""Match the signed UTMT Magick.Native DLL to its upstream native release."""
 import hashlib
 import json
 from pathlib import Path

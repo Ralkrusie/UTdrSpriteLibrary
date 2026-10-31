@@ -16,7 +16,7 @@ Windows 版按需读取 ZIP，不解压整库。包中只有 `manifest.json`、`
 }
 ```
 
-版本及语言／补丁说明由用户填写，空字符串代表未标注。`extractor` 可记录 UMT 与提取脚本摘要。来源只记录文件名及所属目录名，不把本机绝对路径写入可另存的素材包。
+版本及语言／补丁说明由用户填写，空字符串代表未标注。`extractor` 可记录 UTMT 与提取脚本摘要。来源只记录文件名及所属目录名，不把本机绝对路径写入可另存的素材包。
 
 `catalog.json` 保留现有提取器的 schema 1 结构：`items` 按 kind/name 分组，各组有 `variants`。精灵变体具有 `id`、`name`、`chapters`、`width`、`height`、`speed`、`speed_type` 和 `frames`。UT 的章节列表为空，DR 为实际输入章节。帧中的 `image` 指向包内 PNG，`width`/`height` 为原始尺寸；缺失纹理仍记录 missing/error，不伪造图像。
 

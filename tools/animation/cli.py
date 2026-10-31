@@ -19,7 +19,7 @@ from import_game import extract
 from library import LibraryStore, make_package
 from preferences import Preferences
 
-VERSION = '0.3.0-rc4'
+VERSION = '0.3.0'
 CONTRACT = 1
 ROOT = Path(__file__).resolve().parents[2] if not getattr(sys, 'frozen', False) else Path(sys.executable).resolve().parent
 EXIT_CODES = {0: 'success', 1: 'internal_error', 2: 'invalid_argument', 3: 'not_found',

@@ -76,6 +76,7 @@ def main():
         return {'packages': packages, 'selected': selected, 'errors': store.errors,
                 'legacy': (args.library / 'catalog.json').is_file(),
                 'game_import': sys.platform == 'win32',
+                'bundled_extractor': str(dedicated) if dedicated.is_file() else '',
                 'umt': str(bundled_umt) if bundled_umt.is_file() else ''}
 
     def new_job(kind):

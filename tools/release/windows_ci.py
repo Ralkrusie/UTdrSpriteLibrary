@@ -33,10 +33,10 @@ def prepare():
     archive = ROOT / 'vendor/umt/cli-download.zip'
     fetch('https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.9.2.0/UTMT_CLI_v0.9.2.0-Windows.zip', archive)
     if digest(archive) != 'e7573e45d107be34f81f955c6e4afc3c7c8f2628e5a6f307a871e3825b3dfb40':
-        raise ValueError('UMT checksum mismatch')
+        raise ValueError('UTMT checksum mismatch')
     with zipfile.ZipFile(archive) as z:
         if any(Path(n).is_absolute() or '..' in Path(n).parts for n in z.namelist()):
-            raise ValueError('Invalid UMT archive path')
+            raise ValueError('Invalid UTMT archive path')
         z.extractall(ROOT / 'vendor/umt/0.9.2.0')
     fetch('https://github.com/dlemstra/Magick.Native/releases/download/2026.727.1945/windows-Q8-x64.zip', ROOT / 'vendor/release-sources/windows-Q8-x64.zip')
 

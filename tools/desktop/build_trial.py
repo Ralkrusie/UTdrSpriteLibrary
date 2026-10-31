@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 HERE=Path(__file__).resolve().parent
 def main():
- p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--backend',type=Path,required=True);p.add_argument('--all-locales',action='store_true',help='Include every Electron locale instead of Chinese and English');extract=p.add_mutually_exclusive_group();extract.add_argument('--umt',type=Path,help='Optional independently obtained UMT runtime directory');extract.add_argument('--extractor',type=Path,help='Dedicated extractor built from current export.csx');args=p.parse_args();out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
+ p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--backend',type=Path,required=True);p.add_argument('--all-locales',action='store_true',help='Include every Electron locale instead of Chinese and English');extract=p.add_mutually_exclusive_group();extract.add_argument('--utmt','--umt',dest='umt',metavar='PATH',type=Path,help='Optional independently obtained UTMT runtime directory');extract.add_argument('--extractor',type=Path,help='Dedicated extractor built from current export.csx');args=p.parse_args();out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
  runtime=ROOT/'vendor/electron/electron-verified.zip'
  digest=hashlib.sha256(runtime.read_bytes()).hexdigest()
  if not any(line.split()[0]==digest and line.split()[-1].lstrip('*')=='electron-v45.1.0-win32-x64.zip' for line in (ROOT/'vendor/electron/SHASUMS256.txt').read_text().splitlines()):raise ValueError('Electron 官方校验不通过')
@@ -47,9 +47,9 @@ def main():
  shutil.copytree(ROOT/'tools/animation/licenses',backend/'licenses',dirs_exist_ok=True)
  if args.umt:
   umt=args.umt.resolve()
-  if not (umt/'UndertaleModCli.exe').is_file():raise ValueError('UMT CLI missing')
+  if not (umt/'UndertaleModCli.exe').is_file():raise ValueError('UTMT CLI missing')
   report=copy_umt(umt,backend/'umt')
-  print('UMT runtime: kept',report['kept_bytes'],'bytes; omitted',report['excluded_bytes'],'bytes')
+  print('UTMT runtime: kept',report['kept_bytes'],'bytes; omitted',report['excluded_bytes'],'bytes')
  if args.extractor:
   source=args.extractor.resolve()
   if not (source/'SpriteExtractor.exe').is_file() or not (source/'build-profile.json').is_file():raise ValueError('Dedicated extractor build missing')
@@ -58,6 +58,6 @@ def main():
   for name,digest in profile['files'].items():
    if Path(name).name!=name or hashlib.sha256((source/name).read_bytes()).hexdigest()!=digest:raise ValueError('Extractor file checksum mismatch: '+name)
   shutil.copytree(source,backend/'extractor')
- (out/'使用说明.txt').write_text('UTdrSpriteLibrary · Windows x64 测试版\n\n完整解压到可写目录后双击 SpriteLibrary.exe。无需 Python 或 FFmpeg。\n在“管理素材包”中导入 ZIP；也可指定游戏目录，只读提取并制作素材包。未知版本可留空。\n素材包保存在 data/packages，个人设置保存在 data/personal，默认导出位于 data/exports。不要单独移动后端或运行依赖。\n收藏对应当前素材包的原始条目。删除素材包会保留导出与个人设置。\n预览只使用临时缓存；开始拖拽时保存文件，取消拖拽仍保留。MOV 为 qtrle 无损透明单轮动画，接收软件的兼容性需实际确认。\n不附带游戏素材包；界面资源说明见 ASSET_NOTICE.md。许可文件位于根目录、licenses 与 backend/licenses。\n测试版下载与反馈：https://github.com/Ralkrusie/UTdrSpriteLibrary/releases\n',encoding='utf-8-sig')
+ (out/'使用说明.txt').write_text('UTdrSpriteLibrary · Windows x64\n\n完整解压到可写目录后双击 SpriteLibrary.exe。\n在“管理素材包”中导入 ZIP；也可指定游戏目录，只读提取并制作素材包。未知版本可留空。\n素材包保存在 data/packages，个人设置保存在 data/personal，默认导出位于 data/exports。不要单独移动后端或运行依赖。\n收藏对应当前素材包的原始条目。删除素材包会保留导出与个人设置。\n预览只使用临时缓存；开始拖拽时保存文件，取消拖拽仍保留。MOV 为 qtrle 无损透明单轮动画，接收软件的兼容性需实际确认。\n不附带游戏素材包；界面资源说明见 ASSET_NOTICE.md。许可文件位于根目录、licenses 与 backend/licenses。\n测试版下载与反馈：https://github.com/Ralkrusie/UTdrSpriteLibrary/releases\n',encoding='utf-8-sig')
  print(out,flush=True)
 if __name__=='__main__':main()
